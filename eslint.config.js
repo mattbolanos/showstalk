@@ -30,10 +30,14 @@ export default tseslint.config(
         { prefer: "type-imports", fixStyle: "inline-type-imports" },
       ],
       "@typescript-eslint/no-unused-vars": [
-        "warn",
+        "error",
         { argsIgnorePattern: "^_" },
       ],
-      "no-unused-vars": "error",
+      "prefer-const": "error",
+      "no-unreachable": "error",
+      "no-duplicate-imports": ["error"],
+      semi: ["error", "always"],
+      quotes: ["error", "double"],
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/no-misused-promises": [
         "error",
