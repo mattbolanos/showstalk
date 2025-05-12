@@ -1,0 +1,2 @@
+CREATE INDEX "event_metrics_fetch_date_idx" ON "ticket"."event_metrics" USING btree ("fetch_date");--> statement-breakpoint
+CREATE INDEX "event_metrics_event_id_popularity_score_idx" ON "ticket"."event_metrics" USING btree ("event_id","popularity_score");

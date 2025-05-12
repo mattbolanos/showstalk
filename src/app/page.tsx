@@ -1,11 +1,10 @@
 import { FlameIcon } from "lucide-react";
-
 import { api, HydrateClient } from "@/trpc/server";
 
 export default async function Home() {
-  const hello = await api.artist.getLatest();
+  const trendingEvents = await api.events.getTrending();
 
-  void api.artist.getLatest.prefetch();
+  void api.events.getTrending.prefetch();
 
   return (
     <HydrateClient>
@@ -22,7 +21,12 @@ export default async function Home() {
             strokeWidth={2}
           />
           <h2 className="text-lg font-bold">Trending</h2>
-        </span>{" "}
+        </span>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {trendingEvents.map((event) => (
+            <div key={event.id}>{event.name}</div>
+          ))}
+        </div>
       </main>
     </HydrateClient>
   );

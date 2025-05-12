@@ -9,6 +9,7 @@ import {
   foreignKey,
   primaryKey,
   boolean,
+  index,
 } from "drizzle-orm/pg-core";
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -81,5 +82,10 @@ export const eventMetrics = ticketSchema.table(
       columns: [t.eventId],
       foreignColumns: [eventMeta.id],
     }),
+    index("event_metrics_fetch_date_idx").on(t.fetchDate),
+    index("event_metrics_event_id_popularity_score_idx").on(
+      t.eventId,
+      t.popularityScore,
+    ),
   ],
 );

@@ -15,6 +15,13 @@
       "when": 1746995773891,
       "tag": "0001_glorious_rocket_raccoon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1747022900856,
+      "tag": "0002_material_black_panther",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { artistRouter } from "@/server/api/routers/artist";
+import { eventsRouter } from "@/server/api/routers/events";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**
@@ -7,7 +7,7 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  artist: artistRouter,
+  events: eventsRouter,
 });
 
 // export type definition of API
