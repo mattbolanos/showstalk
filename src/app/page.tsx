@@ -1,5 +1,6 @@
 import { FlameIcon } from "lucide-react";
 import { api, HydrateClient } from "@/trpc/server";
+import { EventCard } from "@/components/event-card";
 
 export default async function Home() {
   const trendingEvents = await api.events.getTrending();
@@ -22,9 +23,9 @@ export default async function Home() {
           />
           <h2 className="text-lg font-bold">Trending</h2>
         </span>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-y-4">
           {trendingEvents.map((event) => (
-            <div key={event.id}>{event.name}</div>
+            <EventCard key={event.id} event={event} />
           ))}
         </div>
       </main>

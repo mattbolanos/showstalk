@@ -5,6 +5,16 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  images: {
+    remotePatterns: [
+      {
+        hostname: "s1.ticketm.net",
+        protocol: "https",
+        port: "",
+      },
+    ],
+  },
+};
 
 export default config;

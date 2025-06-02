@@ -15,13 +15,6 @@ const rowNumber =
   );
 
 export const eventsRouter = createTRPCRouter({
-  getLatest: publicProcedure.query(async ({ ctx }) => {
-    const post = await ctx.db.query.artists.findFirst({
-      orderBy: (artists, { desc }) => [desc(artists.upcoming_shows)],
-    });
-
-    return post ?? null;
-  }),
   getTrending: publicProcedure.query(async ({ ctx }) => {
     const topArtistsSubquery = ctx.db
       .select({
