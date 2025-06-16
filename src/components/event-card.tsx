@@ -6,11 +6,21 @@ type RouterOutput = inferRouterOutputs<AppRouter>;
 
 type Event = RouterOutput["events"]["getTrending"][number];
 
+const formatDate = (date: string) => {
+  return new Date(date)
+    .toLocaleDateString("en-US", {
+      month: "numeric",
+      day: "numeric",
+      weekday: "short",
+    })
+    .replace(",", "");
+};
+
 export function EventCard({ event }: { event: Event }) {
   return (
     <div
       key={event.id}
-      className="hover:bg-accent flex justify-between rounded-md p-2 transition-all duration-150"
+      className="hover:bg-accent flex justify-between rounded-md p-2 transition-all duration-100"
     >
       <div className="flex items-center">
         <div className="bg-muted mr-3 size-10 overflow-hidden rounded-[0.5rem]">
@@ -25,8 +35,8 @@ export function EventCard({ event }: { event: Event }) {
         </div>
         <div>
           <h2 className="font-medium">{event.artistName}</h2>
-          <p className="text-muted-foreground text-xs">
-            {event.venueName}, {event.venueCity}
+          <p className="text-muted-foreground text-sm">
+            {formatDate(event.localDatetime)} • {event.venueName}
           </p>
         </div>
       </div>
