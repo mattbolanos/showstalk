@@ -36,7 +36,8 @@ export function EventCard({ event }: { event: Event }) {
         <div>
           <h2 className="font-medium">{event.artistName}</h2>
           <p className="text-muted-foreground text-sm">
-            {formatDate(event.localDatetime)} • {event.venueName}
+            {event.venueCity}, {event.venueState} •{" "}
+            {formatDate(event.localDatetime)}
           </p>
         </div>
       </div>

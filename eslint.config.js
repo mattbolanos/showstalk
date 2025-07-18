@@ -33,6 +33,7 @@ export default tseslint.config(
         "error",
         { argsIgnorePattern: "^_" },
       ],
+      "no-console": "warn",
       "prefer-const": "error",
       "no-unreachable": "error",
       "no-duplicate-imports": ["error"],

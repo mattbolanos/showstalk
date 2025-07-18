@@ -5,7 +5,8 @@ import {
   eventMetrics,
   artists,
 } from "@/server/db/schema";
-import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
 
@@ -79,4 +80,24 @@ export const eventsRouter = createTRPCRouter({
 
     return ctx.db.select().from(shows).where(eq(rowNumber, 1)).limit(8);
   }),
+
+  getEventMetrics: publicProcedure
+    .input(
+      z.object({
+        eventId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db
+        .select({
+          fetchDate: eventMetrics.fetchDate,
+          minPriceTotal:
+            sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
+              "min_price_total",
+            ),
+        })
+        .from(eventMetrics)
+        .where(eq(eventMetrics.eventId, input.eventId))
+        .orderBy(asc(eventMetrics.fetchDate));
+    }),
 });
