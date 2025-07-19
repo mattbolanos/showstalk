@@ -2,7 +2,7 @@ import { FlameIcon } from "lucide-react";
 import { api, HydrateClient } from "@/trpc/server";
 import { EventCard } from "@/components/event-card";
 import { Suspense } from "react";
-import { EventChart } from "@/components/event-chart";
+import { HomeEventParent } from "@/components/home-event-parent";
 
 async function TrendingEvents() {
   const trendingEvents = await api.events.getTrending();
@@ -25,11 +25,7 @@ export default async function Home() {
           </div>
         </header>
         <Suspense fallback={<div>Loading...</div>}>
-          <EventChart
-            initialDataPromise={api.events.getEventMetrics({
-              eventId: "678558383656f182d9f4e1a8",
-            })}
-          />
+          <HomeEventParent defaultSelectedEventId="678558383656f182d9f4e1a8" />
         </Suspense>
         <span className="flex items-center gap-1">
           <FlameIcon

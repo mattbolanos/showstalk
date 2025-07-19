@@ -100,4 +100,19 @@ export const eventsRouter = createTRPCRouter({
         .where(eq(eventMetrics.eventId, input.eventId))
         .orderBy(asc(eventMetrics.fetchDate));
     }),
+
+  getEventMeta: publicProcedure
+    .input(
+      z.object({
+        eventId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return ctx.db
+        .select()
+        .from(eventMeta)
+        .where(eq(eventMeta.id, input.eventId))
+        .limit(1)
+        .then((event) => event[0]);
+    }),
 });

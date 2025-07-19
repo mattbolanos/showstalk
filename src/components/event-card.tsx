@@ -1,12 +1,9 @@
-import type { inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "@/server/api/root";
+import type { RouterOutputs } from "@/trpc/react";
 import Image from "next/image";
 
-type RouterOutput = inferRouterOutputs<AppRouter>;
+type Event = RouterOutputs["events"]["getTrending"][number];
 
-type Event = RouterOutput["events"]["getTrending"][number];
-
-const formatDate = (date: string) => {
+export const formatDate = (date: string) => {
   return new Date(date)
     .toLocaleDateString("en-US", {
       month: "numeric",

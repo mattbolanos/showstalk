@@ -12,11 +12,13 @@ import {
 import {
   type ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+
+import type { RouterOutputs } from "@/trpc/react";
+
+type EventMeta = RouterOutputs["events"]["getEventMeta"];
 
 const chartConfig = {
   minPriceTotal: {
@@ -25,32 +27,42 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function EventChart({
-  initialDataPromise,
-}: {
-  initialDataPromise: Promise<
-    {
-      fetchDate: string;
-      minPriceTotal: number;
-    }[]
-  >;
-}) {
-  const data = React.use(initialDataPromise);
+const formatDate = (date: string) => {
+  return new Date(date)
+    .toLocaleDateString("en-US", {
+      month: "numeric",
+      day: "numeric",
+      year: "2-digit",
+    })
+    .replace(",", "");
+};
 
+export function EventChart({
+  eventMetrics,
+  eventMeta,
+}: {
+  eventMetrics: {
+    fetchDate: string;
+    minPriceTotal: number;
+  }[];
+  eventMeta: EventMeta;
+}) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Event Chart</CardTitle>
+        <CardTitle>
+          {eventMeta?.name} @ {eventMeta?.venueName}, {eventMeta?.venueCity}
+        </CardTitle>
         <CardDescription>
-          This is a chart of the event&apos;s min price total over time.
+          {formatDate(eventMeta?.localDatetime ?? "")} • Get-in prices with fees
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+      <CardContent className="p-1 sm:p-3">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          <AreaChart data={data}>
+          <AreaChart data={eventMetrics}>
             <defs>
               <linearGradient
                 id="fillMinPriceTotal"
@@ -111,7 +123,7 @@ export function EventChart({
                   }}
                   indicator="dot"
                   formatter={(value) => {
-                    return `Min Price: ${value.toLocaleString("en-US", {
+                    return `Starting At: ${value.toLocaleString("en-US", {
                       style: "currency",
                       currency: "USD",
                       notation: "compact",
@@ -127,8 +139,6 @@ export function EventChart({
               stroke="var(--color-primary)"
               stackId="a"
             />
-
-            <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
       </CardContent>
