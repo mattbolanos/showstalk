@@ -1,6 +1,8 @@
 import type { RouterOutputs } from "@/trpc/react";
 import Image from "next/image";
 
+import { cn } from "@/lib/utils";
+
 type Event = RouterOutputs["events"]["getTrending"][number];
 
 export const formatDate = (date: string) => {
@@ -13,11 +15,24 @@ export const formatDate = (date: string) => {
     .replace(",", "");
 };
 
-export function EventCard({ event }: { event: Event }) {
+export function EventCard({
+  event,
+  onSelect,
+  isSelected,
+}: {
+  event: Event;
+  onSelect: () => void;
+  isSelected: boolean;
+}) {
   return (
     <div
       key={event.id}
-      className="hover:bg-accent flex justify-between rounded-md p-2 transition-all duration-100"
+      onMouseDown={onSelect}
+      className={cn(
+        "flex justify-between rounded-md p-2 transition-all duration-100",
+        isSelected && "bg-primary/20 ring-primary ring-2",
+        !isSelected && "hover:bg-primary/10",
+      )}
     >
       <div className="flex items-center">
         <div className="bg-muted mr-3 size-10 overflow-hidden rounded-[0.5rem]">

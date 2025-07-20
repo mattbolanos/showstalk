@@ -5,7 +5,7 @@ import {
   eventMetrics,
   artists,
 } from "@/server/db/schema";
-import { and, asc, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, isNotNull, sql } from "drizzle-orm";
 import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
@@ -97,7 +97,12 @@ export const eventsRouter = createTRPCRouter({
             ),
         })
         .from(eventMetrics)
-        .where(eq(eventMetrics.eventId, input.eventId))
+        .where(
+          and(
+            eq(eventMetrics.eventId, input.eventId),
+            gt(eventMetrics.minPriceTotal, 0),
+          ),
+        )
         .orderBy(asc(eventMetrics.fetchDate));
     }),
 

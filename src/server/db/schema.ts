@@ -10,6 +10,7 @@ import {
   primaryKey,
   boolean,
   index,
+  integer,
 } from "drizzle-orm/pg-core";
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -70,8 +71,8 @@ export const eventMetrics = ticketSchema.table(
   {
     eventId: text("event_id").notNull(),
     fetchDate: text("fetch_date").notNull(),
-    minPriceTotal: numeric("min_price_total").notNull(),
-    minPricePrefee: numeric("min_price_prefee").notNull(),
+    minPriceTotal: integer("min_price_total").notNull(),
+    minPricePrefee: integer("min_price_prefee").notNull(),
     searchScore: numeric("search_score"),
     popularityScore: numeric("popularity_score"),
     trendingScore: numeric("trending_score"),
