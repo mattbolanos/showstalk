@@ -29,7 +29,9 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <div className="px-4 py-10">
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </div>
       </body>
     </html>
   );

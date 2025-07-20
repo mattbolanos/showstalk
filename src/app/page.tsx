@@ -6,7 +6,7 @@ import { HomePage } from "@/components/home-page";
 export default async function Home() {
   return (
     <HydrateClient>
-      <main className="mx-auto flex min-h-screen max-w-4xl flex-col space-y-4 px-8 py-20">
+      <main className="mx-auto flex min-h-screen max-w-4xl flex-col space-y-4">
         <header>
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold">Showstalk</h1>

@@ -29,7 +29,7 @@ export function EventCard({
       key={event.id}
       onMouseDown={onSelect}
       className={cn(
-        "flex justify-between rounded-md p-2 transition-all duration-100",
+        "flex cursor-pointer justify-between rounded-md p-2 transition-all duration-100",
         isSelected && "bg-primary/20 ring-primary ring-2",
         !isSelected && "hover:bg-primary/10",
       )}

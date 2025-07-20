@@ -59,7 +59,7 @@ export function HomePage({
           />
           <h2 className="text-lg font-bold">Trending</h2>
         </span>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {trendingEvents.map((event) => (
             <EventCard
               key={event.id}
