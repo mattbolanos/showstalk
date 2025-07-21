@@ -137,8 +137,10 @@ export function EventChart({
                   timeWindow === selectedTimeWindow ? "default" : "ghost"
                 }
                 className={cn(
-                  "h-8 w-9 rounded-sm px-2 text-xs whitespace-nowrap",
+                  "h-8 w-9 rounded-md p-2 text-xs whitespace-nowrap",
                   timeWindow !== selectedTimeWindow && "hover:bg-primary/10",
+                  timeWindow === selectedTimeWindow &&
+                    "text-primary-foreground",
                 )}
               >
                 {timeWindow}
@@ -147,7 +149,7 @@ export function EventChart({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-1 sm:p-3">
+      <CardContent className="pr-2 pl-1 sm:pr-4">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
@@ -181,6 +183,8 @@ export function EventChart({
                 dataKey="minPriceTotal"
                 tickLine={false}
                 axisLine={false}
+                min={0}
+                // domain={["auto", "dataMax + 50"]}
                 tickMargin={8}
                 minTickGap={32}
                 tickFormatter={(value) => {
