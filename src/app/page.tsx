@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { HomePage } from "@/components/home-page";
 
-export default async function Home() {
+export default function Home() {
   return (
     <div className="mx-auto flex min-h-screen max-w-4xl flex-col space-y-4">
       <Suspense fallback={<div>Loading...</div>}>
