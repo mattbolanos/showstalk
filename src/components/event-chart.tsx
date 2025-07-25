@@ -40,16 +40,6 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const formatDate = (date: string) => {
-  return new Date(date)
-    .toLocaleDateString("en-US", {
-      month: "numeric",
-      day: "numeric",
-      year: "2-digit",
-    })
-    .replace(",", "");
-};
-
 export function EventChart({
   eventMetrics,
   eventMeta,
@@ -113,6 +103,18 @@ export function EventChart({
     };
   }, [data]);
 
+  const getDaysUntilEvent = (date: string): string => {
+    const eventDate = new Date(date);
+    const today = new Date();
+    const diffTime = Math.abs(eventDate.getTime() - today.getTime());
+    const daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+    return daysAway === 1
+      ? "tomorrow"
+      : daysAway === 0
+        ? "today"
+        : `${daysAway} days away`;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -130,8 +132,10 @@ export function EventChart({
             <Skeleton className="h-4 w-24" />
           ) : (
             <>
-              {formatDate(eventMeta?.localDatetime ?? "")} • Get-in price w/
-              fees
+              <span className="text-primary font-bold uppercase">
+                {getDaysUntilEvent(eventMeta?.localDatetime ?? "")}
+              </span>{" "}
+              • Get-in price w/ fees
             </>
           )}
         </CardDescription>
