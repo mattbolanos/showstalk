@@ -130,7 +130,7 @@ export function EventChart({
             <Skeleton className="h-4 w-24" />
           ) : (
             <>
-              {formatDate(eventMeta?.localDatetime ?? "")} • Get-in prices with
+              {formatDate(eventMeta?.localDatetime ?? "")} • Get-in price w/
               fees
             </>
           )}
