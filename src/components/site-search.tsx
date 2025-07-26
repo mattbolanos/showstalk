@@ -98,40 +98,50 @@ export function SiteSearch() {
           </CommandEmpty>
           {artistsResults && artistsResults.length > 0 && (
             <CommandGroup heading="Artists">
-              {artistsResults.map((artist) => (
-                <CommandItem
-                  key={artist.id}
-                  onSelect={() => {
-                    setOpen(false);
-                    router.push(`/artist/${artist.id}`);
-                  }}
-                >
-                  {artist.name}
-                </CommandItem>
-              ))}
+              {artistsResults.map((artist) => {
+                const href = `/artist/${artist.id}`;
+                router.prefetch(href);
+
+                return (
+                  <CommandItem
+                    key={artist.id}
+                    onSelect={() => {
+                      setOpen(false);
+                      router.push(href);
+                    }}
+                  >
+                    {artist.name}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           )}
           {eventsResults && eventsResults.length > 0 && (
             <CommandGroup heading="Events">
-              {eventsResults?.map((event) => (
-                <CommandItem
-                  key={event.id}
-                  onSelect={() => {
-                    setOpen(false);
-                    router.push(`/event/${event.id}`);
-                  }}
-                >
-                  <div className="flex w-full items-center justify-between gap-2">
-                    <div className="flex flex-col">
-                      <span className="font-medium">{event.name}</span>
-                      <p className="text-muted-foreground text-xs">
-                        {formatVenue(event.venueCity, event.venueState)} •{" "}
-                        {event.venueName} • {formatDate(event.localDatetime)}
-                      </p>
+              {eventsResults?.map((event) => {
+                const href = `/event/${event.id}`;
+                router.prefetch(href);
+
+                return (
+                  <CommandItem
+                    key={event.id}
+                    onSelect={() => {
+                      setOpen(false);
+                      router.push(`/event/${event.id}`);
+                    }}
+                  >
+                    <div className="flex w-full items-center justify-between gap-2">
+                      <div className="flex flex-col">
+                        <span className="font-medium">{event.name}</span>
+                        <p className="text-muted-foreground text-xs">
+                          {formatVenue(event.venueCity, event.venueState)} •{" "}
+                          {event.venueName} • {formatDate(event.localDatetime)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </CommandItem>
-              ))}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           )}
         </CommandList>
