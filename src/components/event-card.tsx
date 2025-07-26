@@ -15,6 +15,10 @@ export const formatDate = (date: string) => {
     .replace(",", "");
 };
 
+export const formatVenue = (city: string, state: string) => {
+  return `${city}${state ? `, ${state}` : ""}`;
+};
+
 export function EventCard({
   event,
   onSelect,
@@ -48,7 +52,7 @@ export function EventCard({
         <div>
           <h2 className="font-medium">{event.artistName}</h2>
           <p className="text-muted-foreground text-sm">
-            {event.venueCity}, {event.venueState} •{" "}
+            {formatVenue(event.venueCity, event.venueState)} •{" "}
             {formatDate(event.localDatetime)}
           </p>
         </div>

@@ -13,13 +13,37 @@ import {
   CommandList,
 } from "./ui/command";
 import { DialogTitle } from "./ui/dialog";
+import { formatDate, formatVenue } from "./event-card";
 import { SearchIcon } from "lucide-react";
 
+import { useRouter } from "next/navigation";
+
 export function SiteSearch() {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+  const [query, setQuery] = React.useState("");
+  const [debounceLoading, setDebounceLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    setDebounceLoading(true);
+    const timer = setTimeout(() => {
+      setQuery(value);
+      setDebounceLoading(false);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [value]);
 
   const { data: topEvents } = api.events.getTrending.useQuery();
+
+  const { data: artistsResults, isLoading: artistsLoading } =
+    api.events.searchArtists.useQuery(
+      {
+        query,
+      },
+      { enabled: open && !!query },
+    );
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -32,12 +56,14 @@ export function SiteSearch() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const data = React.useMemo(() => {
-    if (!value) return topEvents;
+  const eventsResults = React.useMemo(() => {
+    if (!query) return topEvents;
     return topEvents?.filter((event) =>
-      event.name.toLowerCase().includes(value.toLowerCase()),
+      event.name.toLowerCase().includes(query.toLowerCase()),
     );
-  }, [value, topEvents]);
+  }, [query, topEvents]);
+
+  const isLoading = artistsLoading || debounceLoading;
 
   return (
     <div className="flex w-full justify-center">
@@ -64,14 +90,50 @@ export function SiteSearch() {
           placeholder="What concert are you looking for?"
           value={value}
           onValueChange={setValue}
+          loading={isLoading}
         />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Top Events">
-            {data?.map((event) => (
-              <CommandItem key={event.id}>{event.name}</CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandEmpty className="flex h-16 items-center justify-center gap-2 md:h-18">
+            {isLoading ? "" : "No results found."}
+          </CommandEmpty>
+          {artistsResults && artistsResults.length > 0 && (
+            <CommandGroup heading="Artists">
+              {artistsResults.map((artist) => (
+                <CommandItem
+                  key={artist.id}
+                  onSelect={() => {
+                    setOpen(false);
+                    router.push(`/artist/${artist.id}`);
+                  }}
+                >
+                  {artist.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+          {eventsResults && eventsResults.length > 0 && (
+            <CommandGroup heading="Events">
+              {eventsResults?.map((event) => (
+                <CommandItem
+                  key={event.id}
+                  onSelect={() => {
+                    setOpen(false);
+                    router.push(`/event/${event.id}`);
+                  }}
+                >
+                  <div className="flex w-full items-center justify-between gap-2">
+                    <div className="flex flex-col">
+                      <span className="font-medium">{event.name}</span>
+                      <p className="text-muted-foreground text-xs">
+                        {formatVenue(event.venueCity, event.venueState)} •{" "}
+                        {event.venueName} • {formatDate(event.localDatetime)}
+                      </p>
+                    </div>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </CommandList>
       </CommandDialog>
     </div>
