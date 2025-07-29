@@ -13,38 +13,54 @@ import { relations } from "drizzle-orm";
 
 const ticketSchema = pgSchema("ticket");
 
-export const artists = ticketSchema.table("artists", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  upcoming_shows: numeric("upcoming_shows"),
-  image: text("image"),
-  slug: text("slug").notNull(),
-  genre: text("genre"),
-  subgenre: text("subgenre"),
-  link_instagram: text("link_instagram"),
-  link_spotify: text("link_spotify"),
-  link_itunes: text("link_itunes"),
-  link_twitter: text("link_twitter"),
-  link_musicbrainz: text("link_musicbrainz"),
-});
+export const artists = ticketSchema.table(
+  "artists",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    upcoming_shows: numeric("upcoming_shows"),
+    image: text("image"),
+    slug: text("slug").notNull(),
+    genre: text("genre"),
+    subgenre: text("subgenre"),
+    link_instagram: text("link_instagram"),
+    link_spotify: text("link_spotify"),
+    link_itunes: text("link_itunes"),
+    link_twitter: text("link_twitter"),
+    link_musicbrainz: text("link_musicbrainz"),
+  },
+  (t) => [
+    index("artists_name_idx").on(t.name),
+    index("artists_slug_idx").on(t.slug),
+  ],
+);
 
-export const eventMeta = ticketSchema.table("event_meta", {
-  id: text("id").primaryKey(),
-  localDatetime: text("local_datetime").notNull(),
-  utcDatetime: text("utc_datetime").notNull(),
-  isTimeTbd: boolean("is_time_tbd").notNull(),
-  name: text("name").notNull(),
-  eventCategory: text("event_category").notNull(),
-  venueName: text("venue_name").notNull(),
-  venueCity: text("venue_city").notNull(),
-  venueState: text("venue_state").notNull(),
-  venueStreetAddress: text("venue_street_address").notNull(),
-  venueExtendedAddress: text("venue_extended_address"),
-  venueLatitude: numeric("venue_latitude", { precision: 8, scale: 6 }),
-  venueLongitude: numeric("venue_longitude", { precision: 9, scale: 6 }),
-  venueTimezone: text("venue_timezone").notNull(),
-  updatedAt: text("updated_at").notNull().default("now()"),
-});
+export const eventMeta = ticketSchema.table(
+  "event_meta",
+  {
+    id: text("id").primaryKey(),
+    localDatetime: text("local_datetime").notNull(),
+    utcDatetime: text("utc_datetime").notNull(),
+    isTimeTbd: boolean("is_time_tbd").notNull(),
+    name: text("name").notNull(),
+    eventCategory: text("event_category").notNull(),
+    venueName: text("venue_name").notNull(),
+    venueCity: text("venue_city").notNull(),
+    venueState: text("venue_state").notNull(),
+    venueStreetAddress: text("venue_street_address").notNull(),
+    venueExtendedAddress: text("venue_extended_address"),
+    venueLatitude: numeric("venue_latitude", { precision: 8, scale: 6 }),
+    venueLongitude: numeric("venue_longitude", { precision: 9, scale: 6 }),
+    venueTimezone: text("venue_timezone").notNull(),
+    updatedAt: text("updated_at").notNull().default("now()"),
+  },
+  (t) => [
+    index("event_meta_name_idx").on(t.name),
+    index("event_meta_venue_name_idx").on(t.venueName),
+    index("event_meta_venue_city_idx").on(t.venueCity),
+    index("event_meta_venue_state_idx").on(t.venueState),
+  ],
+);
 
 export const eventArtists = ticketSchema.table(
   "event_artists",

@@ -5,7 +5,18 @@ import {
   eventMetrics,
   artists,
 } from "@/server/db/schema";
-import { and, asc, desc, eq, gt, ilike, isNotNull, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  gte,
+  ilike,
+  isNotNull,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
@@ -151,6 +162,10 @@ export const eventsRouter = createTRPCRouter({
               ilike(eventMeta.venueState, `%${term}%`),
             ),
           ),
+          gte(
+            eventMeta.localDatetime,
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          ),
         ),
         with: {
           eventArtists: {
@@ -163,7 +178,7 @@ export const eventsRouter = createTRPCRouter({
             },
           },
         },
-        limit: 12,
+        limit: 8,
       });
     }),
 });

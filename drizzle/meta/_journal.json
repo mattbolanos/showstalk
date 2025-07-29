@@ -22,6 +22,27 @@
       "when": 1747022900856,
       "tag": "0002_material_black_panther",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1753758437365,
+      "tag": "0003_perpetual_molten_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1753760943454,
+      "tag": "0004_graceful_mariko_yashida",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1753761437699,
+      "tag": "0005_elite_machine_man",
+      "breakpoints": true
     }
   ]
 }

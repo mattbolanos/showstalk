@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 type Event = RouterOutputs["events"]["getTrending"][number];
 
-export const formatDate = (date: string) => {
+const formatDate = (date: string) => {
   return new Date(date)
     .toLocaleDateString("en-US", {
       month: "numeric",

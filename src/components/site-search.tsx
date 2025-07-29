@@ -15,7 +15,7 @@ import {
   CommandList,
 } from "./ui/command";
 import { DialogTitle } from "./ui/dialog";
-import { formatDate, formatVenue } from "./event-card";
+import { formatVenue } from "./event-card";
 import { LoaderIcon, SearchIcon } from "lucide-react";
 
 import { useRouter } from "next/navigation";
@@ -38,6 +38,12 @@ const formatEventDate = (localDatetime: string) => {
     date: date.toLocaleDateString("en-US", {
       month: "numeric",
       day: "numeric",
+      timeZone: "UTC",
+    }),
+    time: date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
       timeZone: "UTC",
     }),
   };
@@ -81,7 +87,7 @@ export function SiteSearch() {
     {
       query,
     },
-    { enabled: open && !!query },
+    { enabled: open && !!query, queryHash: query },
   );
 
   const {
@@ -117,6 +123,7 @@ export function SiteSearch() {
     href: string;
     type: "event" | "top";
   }) => {
+    const eventDate = formatEventDate(event.localDatetime);
     return (
       <CommandItem
         key={event.id}
@@ -130,17 +137,17 @@ export function SiteSearch() {
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex w-10 flex-shrink-0 flex-col">
             <span className="text-primary text-sm font-semibold tabular-nums">
-              {formatEventDate(event.localDatetime).date}
+              {eventDate.date}
             </span>
             <span className="text-muted-foreground text-xs">
-              {formatEventDate(event.localDatetime).weekday}
+              {eventDate.weekday}
             </span>
           </div>
           <div className="flex min-w-0 flex-col">
             <span className="truncate font-medium">{event.name}</span>
-            <p className="text-muted-foreground truncate text-xs">
+            <p className="text-muted-foreground truncate text-xs tabular-nums">
               {formatVenue(event.venueCity, event.venueState)} •{" "}
-              {event.venueName} • {formatDate(event.localDatetime)}
+              {event.venueName} • {eventDate.time}
             </p>
           </div>
         </div>
@@ -202,7 +209,7 @@ export function SiteSearch() {
                     onSelect={() => {
                       handleSelect(href);
                     }}
-                    value={artist.name}
+                    value={`${artist.name} ${artist.slug}`}
                     className="flex items-center gap-3"
                   >
                     <div className="size-10 overflow-hidden rounded-full">
