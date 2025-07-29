@@ -1,8 +1,10 @@
 "use client";
 
-import { api } from "@/trpc/react";
-
 import * as React from "react";
+import Image from "next/image";
+
+import { api, type RouterOutputs } from "@/trpc/react";
+
 import { Button } from "./ui/button";
 import {
   CommandDialog,
@@ -14,9 +16,32 @@ import {
 } from "./ui/command";
 import { DialogTitle } from "./ui/dialog";
 import { formatDate, formatVenue } from "./event-card";
-import { SearchIcon } from "lucide-react";
+import { LoaderIcon, SearchIcon } from "lucide-react";
 
 import { useRouter } from "next/navigation";
+
+type EventResult = RouterOutputs["events"]["searchEvents"][number];
+type TopEvent = RouterOutputs["events"]["getTrending"][number];
+
+const createEventValue = (event: EventResult) => {
+  const artistNames = event.eventArtists.map((artist) => artist.artist.name);
+  return `${event.id} ${artistNames.join(", ")} ${event.name} ${event.venueName} ${event.venueCity} ${event.venueState}`;
+};
+
+const formatEventDate = (localDatetime: string) => {
+  const date = new Date(localDatetime);
+  return {
+    weekday: date.toLocaleDateString("en-US", {
+      weekday: "short",
+      timeZone: "UTC",
+    }),
+    date: date.toLocaleDateString("en-US", {
+      month: "numeric",
+      day: "numeric",
+      timeZone: "UTC",
+    }),
+  };
+};
 
 export function SiteSearch() {
   const router = useRouter();
@@ -30,20 +55,10 @@ export function SiteSearch() {
     const timer = setTimeout(() => {
       setQuery(value);
       setDebounceLoading(false);
-    }, 200);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [value]);
-
-  const { data: topEvents } = api.events.getTrending.useQuery();
-
-  const { data: artistsResults, isLoading: artistsLoading } =
-    api.events.searchArtists.useQuery(
-      {
-        query,
-      },
-      { enabled: open && !!query },
-    );
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -56,14 +71,82 @@ export function SiteSearch() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const eventsResults = React.useMemo(() => {
-    if (!query) return topEvents;
-    return topEvents?.filter((event) =>
-      event.name.toLowerCase().includes(query.toLowerCase()),
-    );
-  }, [query, topEvents]);
+  const { data: topEvents } = api.events.getTrending.useQuery();
 
-  const isLoading = artistsLoading || debounceLoading;
+  const {
+    data: artistsResults,
+    isLoading: artistsLoading,
+    isPending: artistsPending,
+  } = api.events.searchArtists.useQuery(
+    {
+      query,
+    },
+    { enabled: open && !!query },
+  );
+
+  const {
+    data: eventsResults,
+    isLoading: eventsLoading,
+    isPending: eventsPending,
+  } = api.events.searchEvents.useQuery(
+    {
+      query,
+    },
+    { enabled: open && !!query },
+  );
+
+  const isLoading = artistsLoading || debounceLoading || eventsLoading;
+  const isPending = artistsPending || debounceLoading || eventsPending;
+
+  const totalResults =
+    (artistsResults?.length ?? 0) + (eventsResults?.length ?? 0);
+
+  const handleSelect = (href: string) => {
+    router.push(href);
+    setOpen(false);
+    setValue("");
+    setQuery("");
+  };
+
+  const EventItem = ({
+    event,
+    href,
+    type,
+  }: {
+    event: EventResult | TopEvent;
+    href: string;
+    type: "event" | "top";
+  }) => {
+    return (
+      <CommandItem
+        key={event.id}
+        onSelect={() => {
+          handleSelect(href);
+        }}
+        {...(type === "event" && {
+          value: createEventValue(event as EventResult),
+        })}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex w-10 flex-shrink-0 flex-col">
+            <span className="text-primary text-sm font-semibold tabular-nums">
+              {formatEventDate(event.localDatetime).date}
+            </span>
+            <span className="text-muted-foreground text-xs">
+              {formatEventDate(event.localDatetime).weekday}
+            </span>
+          </div>
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate font-medium">{event.name}</span>
+            <p className="text-muted-foreground truncate text-xs">
+              {formatVenue(event.venueCity, event.venueState)} •{" "}
+              {event.venueName} • {formatDate(event.localDatetime)}
+            </p>
+          </div>
+        </div>
+      </CommandItem>
+    );
+  };
 
   return (
     <div className="flex w-full justify-center">
@@ -94,8 +177,19 @@ export function SiteSearch() {
         />
         <CommandList>
           <CommandEmpty className="flex h-16 items-center justify-center gap-2 md:h-18">
-            {isLoading ? "" : "No results found."}
+            {(isLoading || isPending) && totalResults === 0 ? (
+              <div className="flex h-16 items-center justify-center gap-2 md:h-18">
+                <LoaderIcon
+                  aria-hidden="true"
+                  className="text-primary size-4 animate-spin"
+                />
+                Searching...
+              </div>
+            ) : (
+              "No results found."
+            )}
           </CommandEmpty>
+
           {artistsResults && artistsResults.length > 0 && (
             <CommandGroup heading="Artists">
               {artistsResults.map((artist) => {
@@ -106,16 +200,33 @@ export function SiteSearch() {
                   <CommandItem
                     key={artist.id}
                     onSelect={() => {
-                      setOpen(false);
-                      router.push(href);
+                      handleSelect(href);
                     }}
+                    value={artist.name}
+                    className="flex items-center gap-3"
                   >
-                    {artist.name}
+                    <div className="size-10 overflow-hidden rounded-full">
+                      <Image
+                        src={artist.image ?? ""}
+                        alt={artist.name}
+                        width={40}
+                        height={40}
+                        loading="eager"
+                        className="size-full object-cover"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{artist.name}</span>
+                      <p className="text-muted-foreground text-sm">
+                        {artist.genre}
+                      </p>
+                    </div>
                   </CommandItem>
                 );
               })}
             </CommandGroup>
           )}
+
           {eventsResults && eventsResults.length > 0 && (
             <CommandGroup heading="Events">
               {eventsResults?.map((event) => {
@@ -123,23 +234,29 @@ export function SiteSearch() {
                 router.prefetch(href);
 
                 return (
-                  <CommandItem
+                  <EventItem
                     key={event.id}
-                    onSelect={() => {
-                      setOpen(false);
-                      router.push(`/event/${event.id}`);
-                    }}
-                  >
-                    <div className="flex w-full items-center justify-between gap-2">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{event.name}</span>
-                        <p className="text-muted-foreground text-xs">
-                          {formatVenue(event.venueCity, event.venueState)} •{" "}
-                          {event.venueName} • {formatDate(event.localDatetime)}
-                        </p>
-                      </div>
-                    </div>
-                  </CommandItem>
+                    href={href}
+                    event={event}
+                    type="event"
+                  />
+                );
+              })}
+            </CommandGroup>
+          )}
+          {!query && (
+            <CommandGroup heading="Events">
+              {topEvents?.map((event) => {
+                const href = `/event/${event.id}`;
+                router.prefetch(href);
+
+                return (
+                  <EventItem
+                    key={event.id}
+                    href={href}
+                    event={event}
+                    type="top"
+                  />
                 );
               })}
             </CommandGroup>

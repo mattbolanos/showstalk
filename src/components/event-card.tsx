@@ -11,6 +11,7 @@ export const formatDate = (date: string) => {
       month: "numeric",
       day: "numeric",
       weekday: "short",
+      timeZone: "UTC",
     })
     .replace(",", "");
 };
@@ -39,12 +40,12 @@ export function EventCard({
       )}
     >
       <div className="flex items-center">
-        <div className="bg-muted mr-3 size-10 overflow-hidden rounded-[0.5rem]">
+        <div className="bg-muted mr-3 size-11 overflow-hidden rounded-lg">
           <Image
             src={event.artistImage}
             alt={event.artistName}
-            width={40}
-            height={40}
+            width={44}
+            height={44}
             loading="eager"
             className="size-full object-cover"
           />

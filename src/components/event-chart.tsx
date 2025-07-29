@@ -107,7 +107,7 @@ export function EventChart({
     const eventDate = new Date(date);
     const today = new Date();
     const diffTime = Math.abs(eventDate.getTime() - today.getTime());
-    const daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+    const daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return daysAway === 1
       ? "tomorrow"
       : daysAway === 0
@@ -170,7 +170,7 @@ export function EventChart({
                   timeWindow === selectedTimeWindow ? "default" : "ghost"
                 }
                 className={cn(
-                  "h-8 w-9 rounded-md p-2 text-xs whitespace-nowrap",
+                  "h-8 w-9 rounded-lg p-2 text-xs whitespace-nowrap",
                   timeWindow !== selectedTimeWindow && "hover:bg-primary/10",
                   timeWindow === selectedTimeWindow &&
                     "text-primary-foreground",

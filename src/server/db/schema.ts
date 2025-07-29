@@ -1,6 +1,3 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
 import {
   text,
   pgSchema,
@@ -12,12 +9,7 @@ import {
   index,
   integer,
 } from "drizzle-orm/pg-core";
-/**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
- */
+import { relations } from "drizzle-orm";
 
 const ticketSchema = pgSchema("ticket");
 
@@ -27,6 +19,13 @@ export const artists = ticketSchema.table("artists", {
   upcoming_shows: numeric("upcoming_shows"),
   image: text("image"),
   slug: text("slug").notNull(),
+  genre: text("genre"),
+  subgenre: text("subgenre"),
+  link_instagram: text("link_instagram"),
+  link_spotify: text("link_spotify"),
+  link_itunes: text("link_itunes"),
+  link_twitter: text("link_twitter"),
+  link_musicbrainz: text("link_musicbrainz"),
 });
 
 export const eventMeta = ticketSchema.table("event_meta", {
@@ -90,3 +89,23 @@ export const eventMetrics = ticketSchema.table(
     ),
   ],
 );
+
+export const eventMetaRelations = relations(eventMeta, ({ many }) => ({
+  eventArtists: many(eventArtists),
+}));
+
+export const artistRelations = relations(artists, ({ many }) => ({
+  eventArtists: many(eventArtists),
+}));
+
+export const eventArtistsRelations = relations(eventArtists, ({ one }) => ({
+  event: one(eventMeta, {
+    fields: [eventArtists.eventId],
+    references: [eventMeta.id],
+  }),
+  artist: one(artists, {
+    fields: [eventArtists.artistId],
+    references: [artists.id],
+    relationName: "artist",
+  }),
+}));

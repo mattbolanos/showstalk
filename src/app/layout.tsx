@@ -3,9 +3,10 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { TRPCReactProvider } from "@/trpc/react";
 import { SiteNav } from "@/components/site-nav";
 import { HydrateClient } from "@/trpc/server";
+import { TRPCReactProvider } from "@/trpc/react";
+import { ThemeProvider } from "./theme-provider";
 
 export const metadata: Metadata = {
   title: "Showstalk",
@@ -42,11 +43,18 @@ export default function RootLayout({
       </head>
       <body>
         <TRPCReactProvider>
-          <SiteNav />
           <HydrateClient>
-            <main className="mx-auto w-full max-w-[var(--breakpoint-2xl)] px-3 py-8">
-              {children}
-            </main>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <SiteNav />
+              <main className="mx-auto w-full max-w-[var(--breakpoint-2xl)] px-3 py-8">
+                {children}
+              </main>
+            </ThemeProvider>
           </HydrateClient>
         </TRPCReactProvider>
       </body>

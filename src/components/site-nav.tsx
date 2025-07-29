@@ -1,6 +1,7 @@
 import { FlameIcon } from "lucide-react";
 
 import { SiteSearch } from "./site-search";
+import { ThemeToggle } from "./theme-toggle";
 
 export function SiteNav() {
   return (
@@ -17,14 +18,7 @@ export function SiteNav() {
         {/* Search form */}
         <SiteSearch />
 
-        <div className="flex items-center justify-center gap-1">
-          <FlameIcon
-            size={28}
-            className="fill-primary stroke-orange-500/20"
-            strokeWidth={2}
-          />
-          <p className="text-primary text-lg font-semibold">Showstalk</p>
-        </div>
+        <ThemeToggle />
       </div>
     </header>
   );

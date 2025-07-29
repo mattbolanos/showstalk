@@ -132,4 +132,38 @@ export const eventsRouter = createTRPCRouter({
         limit: 10,
       });
     }),
+
+  searchEvents: publicProcedure
+    .input(z.object({ query: z.string() }))
+    .query(async ({ ctx, input }) => {
+      if (input.query.length < 2) return [];
+
+      const searchTerms = input.query.split(" ").filter(Boolean);
+
+      return ctx.db.query.eventMeta.findMany({
+        where: and(
+          ...searchTerms.map((term) =>
+            or(
+              ilike(eventMeta.name, `%${term}%`),
+              ilike(artists.name, `%${term}%`),
+              ilike(eventMeta.venueName, `%${term}%`),
+              ilike(eventMeta.venueCity, `%${term}%`),
+              ilike(eventMeta.venueState, `%${term}%`),
+            ),
+          ),
+        ),
+        with: {
+          eventArtists: {
+            with: {
+              artist: {
+                columns: {
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        limit: 12,
+      });
+    }),
 });
