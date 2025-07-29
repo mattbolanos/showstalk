@@ -16,7 +16,7 @@ export function ArtistImage({
   return (
     <div
       className={cn(
-        "bg-muted ring-foreground/75 overflow-hidden rounded-full ring",
+        "bg-muted ring-foreground/70 overflow-hidden rounded-full ring",
         containerClassName,
       )}
     >

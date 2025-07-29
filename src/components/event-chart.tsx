@@ -200,7 +200,7 @@ export function EventChart({
       <CardContent className="pr-1">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full pr-5"
+          className="aspect-auto h-[250px] w-full pr-1"
         >
           {isLoading ? (
             <Skeleton className="h-full w-full" />
