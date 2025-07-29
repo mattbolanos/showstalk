@@ -7,6 +7,7 @@ import { api, type RouterOutputs } from "@/trpc/react";
 
 import { Button } from "./ui/button";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -22,11 +23,6 @@ import { useRouter } from "next/navigation";
 
 type EventResult = RouterOutputs["events"]["searchEvents"][number];
 type TopEvent = RouterOutputs["events"]["getTrending"][number];
-
-const createEventValue = (event: EventResult) => {
-  const artistNames = event.eventArtists.map((artist) => artist.artist.name);
-  return `${event.id} ${artistNames.join(", ")} ${event.name} ${event.venueName} ${event.venueCity} ${event.venueState}`;
-};
 
 const formatEventDate = (localDatetime: string) => {
   const date = new Date(localDatetime);
@@ -117,11 +113,9 @@ export function SiteSearch() {
   const EventItem = ({
     event,
     href,
-    type,
   }: {
     event: EventResult | TopEvent;
     href: string;
-    type: "event" | "top";
   }) => {
     const eventDate = formatEventDate(event.localDatetime);
     return (
@@ -130,9 +124,6 @@ export function SiteSearch() {
         onSelect={() => {
           handleSelect(href);
         }}
-        {...(type === "event" && {
-          value: createEventValue(event as EventResult),
-        })}
       >
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex w-10 flex-shrink-0 flex-col">
@@ -172,6 +163,7 @@ export function SiteSearch() {
           <SearchIcon size={16} strokeWidth={2} aria-hidden="true" />
         </div>
       </Button>
+
       <CommandDialog open={open} onOpenChange={setOpen}>
         <DialogTitle className="sr-only">
           Search for an artist or venue...
@@ -183,91 +175,78 @@ export function SiteSearch() {
           loading={isLoading}
         />
         <CommandList>
-          <CommandEmpty className="flex h-16 items-center justify-center gap-2 md:h-18">
-            {(isLoading || isPending) && totalResults === 0 ? (
-              <div className="flex h-16 items-center justify-center gap-2 md:h-18">
-                <LoaderIcon
-                  aria-hidden="true"
-                  className="text-primary size-4 animate-spin"
-                />
-                Searching...
-              </div>
-            ) : (
-              "No results found."
+          <Command shouldFilter={false}>
+            <CommandEmpty className="flex h-16 items-center justify-center gap-2 md:h-18">
+              {(isLoading || isPending) && totalResults === 0 ? (
+                <div className="flex h-16 items-center justify-center gap-2 md:h-18">
+                  <LoaderIcon
+                    aria-hidden="true"
+                    className="text-primary size-4 animate-spin"
+                  />
+                  Searching...
+                </div>
+              ) : (
+                "No results found."
+              )}
+            </CommandEmpty>
+
+            {artistsResults && artistsResults.length > 0 && (
+              <CommandGroup heading="Artists">
+                {artistsResults.map((artist) => {
+                  const href = `/artist/${artist.id}`;
+                  router.prefetch(href);
+
+                  return (
+                    <CommandItem
+                      key={artist.id}
+                      onSelect={() => {
+                        handleSelect(href);
+                      }}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="size-10 overflow-hidden rounded-full">
+                        <Image
+                          src={artist.image ?? ""}
+                          alt={artist.name}
+                          width={40}
+                          height={40}
+                          loading="eager"
+                          className="size-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{artist.name}</span>
+                        <p className="text-muted-foreground text-sm">
+                          {artist.genre}
+                        </p>
+                      </div>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
             )}
-          </CommandEmpty>
 
-          {artistsResults && artistsResults.length > 0 && (
-            <CommandGroup heading="Artists">
-              {artistsResults.map((artist) => {
-                const href = `/artist/${artist.id}`;
-                router.prefetch(href);
+            {eventsResults && eventsResults.length > 0 && (
+              <CommandGroup heading="Events">
+                {eventsResults?.map((event) => {
+                  const href = `/event/${event.id}`;
+                  router.prefetch(href);
 
-                return (
-                  <CommandItem
-                    key={artist.id}
-                    onSelect={() => {
-                      handleSelect(href);
-                    }}
-                    value={`${artist.name} ${artist.slug}`}
-                    className="flex items-center gap-3"
-                  >
-                    <div className="size-10 overflow-hidden rounded-full">
-                      <Image
-                        src={artist.image ?? ""}
-                        alt={artist.name}
-                        width={40}
-                        height={40}
-                        loading="eager"
-                        className="size-full object-cover"
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{artist.name}</span>
-                      <p className="text-muted-foreground text-sm">
-                        {artist.genre}
-                      </p>
-                    </div>
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          )}
+                  return <EventItem key={event.id} href={href} event={event} />;
+                })}
+              </CommandGroup>
+            )}
+            {!query && (
+              <CommandGroup heading="Events">
+                {topEvents?.map((event) => {
+                  const href = `/event/${event.id}`;
+                  router.prefetch(href);
 
-          {eventsResults && eventsResults.length > 0 && (
-            <CommandGroup heading="Events">
-              {eventsResults?.map((event) => {
-                const href = `/event/${event.id}`;
-                router.prefetch(href);
-
-                return (
-                  <EventItem
-                    key={event.id}
-                    href={href}
-                    event={event}
-                    type="event"
-                  />
-                );
-              })}
-            </CommandGroup>
-          )}
-          {!query && (
-            <CommandGroup heading="Events">
-              {topEvents?.map((event) => {
-                const href = `/event/${event.id}`;
-                router.prefetch(href);
-
-                return (
-                  <EventItem
-                    key={event.id}
-                    href={href}
-                    event={event}
-                    type="top"
-                  />
-                );
-              })}
-            </CommandGroup>
-          )}
+                  return <EventItem key={event.id} href={href} event={event} />;
+                })}
+              </CommandGroup>
+            )}
+          </Command>
         </CommandList>
       </CommandDialog>
     </div>
