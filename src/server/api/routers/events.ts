@@ -61,6 +61,9 @@ export const eventsRouter = createTRPCRouter({
         ),
         venueCity: sql<string>`${eventMeta.venueCity}`.as("venue_city"),
         venueState: sql<string>`${eventMeta.venueState}`.as("venue_state"),
+        venueExtendedAddress: sql<string>`${eventMeta.venueExtendedAddress}`.as(
+          "venue_extended_address",
+        ),
         venueName: sql<string>`${eventMeta.venueName}`.as("venue_name"),
         localDatetime: sql<string>`${eventMeta.localDatetime}`.as(
           "local_datetime",

@@ -16,8 +16,18 @@ const formatDate = (date: string) => {
     .replace(",", "");
 };
 
-export const formatVenue = (city: string, state: string) => {
-  return `${city}${state ? `, ${state}` : ""}`;
+export const formatVenue = (
+  city: string,
+  state: string,
+  extendedAddress: string,
+) => {
+  const trimmedState = state.trim();
+  if (trimmedState) return `${city}, ${trimmedState}`;
+  if (extendedAddress) {
+    if (extendedAddress.includes(",")) return extendedAddress;
+    return `${city}, ${extendedAddress}`;
+  }
+  return city;
 };
 
 export function EventCard({
@@ -53,8 +63,12 @@ export function EventCard({
         <div>
           <h2 className="font-medium">{event.artistName}</h2>
           <p className="text-muted-foreground text-sm">
-            {formatVenue(event.venueCity, event.venueState)} •{" "}
-            {formatDate(event.localDatetime)}
+            {formatVenue(
+              event.venueCity,
+              event.venueState,
+              event.venueExtendedAddress,
+            )}{" "}
+            • {formatDate(event.localDatetime)}
           </p>
         </div>
       </div>

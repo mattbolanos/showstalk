@@ -17,7 +17,7 @@ import {
 } from "./ui/command";
 import { DialogTitle } from "./ui/dialog";
 import { formatVenue } from "./event-card";
-import { LoaderIcon, SearchIcon } from "lucide-react";
+import { LoaderIcon, SearchIcon, TrendingUpIcon } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
@@ -137,8 +137,12 @@ export function SiteSearch() {
           <div className="flex min-w-0 flex-col">
             <span className="truncate font-medium">{event.name}</span>
             <p className="text-muted-foreground truncate text-xs tabular-nums">
-              {formatVenue(event.venueCity, event.venueState)} •{" "}
-              {event.venueName}
+              {formatVenue(
+                event.venueCity,
+                event.venueState,
+                event.venueExtendedAddress ?? "",
+              )}{" "}
+              • {event.venueName}
             </p>
           </div>
         </div>
@@ -154,7 +158,7 @@ export function SiteSearch() {
         onMouseDown={() => setOpen(true)}
       >
         <span className="text-muted-foreground inline-flex pl-6 text-left text-base">
-          Search for an artist or venue...
+          Search for an artist or location...
         </span>
         <kbd className="bg-muted pointer-events-none absolute top-1/2 right-1.5 hidden h-5 shrink-0 -translate-y-1/2 items-center gap-1 rounded border px-1.5 font-mono text-xs font-medium opacity-100 select-none md:flex">
           <span className="text-xs">⌘</span>K
@@ -169,7 +173,7 @@ export function SiteSearch() {
           Search for an artist or venue...
         </DialogTitle>
         <CommandInput
-          placeholder="What concert are you looking for?"
+          placeholder="Gaga Seattle, Red Rocks, or Phoenix"
           value={value}
           onValueChange={setValue}
           loading={isLoading}
@@ -237,8 +241,15 @@ export function SiteSearch() {
               </CommandGroup>
             )}
             {!query && (
-              <CommandGroup heading="Events">
-                {topEvents?.map((event) => {
+              <CommandGroup
+                heading={
+                  <span className="flex items-center gap-2">
+                    <TrendingUpIcon size={16} className="stroke-primary" />
+                    Trending
+                  </span>
+                }
+              >
+                {topEvents?.slice(0, 3).map((event) => {
                   const href = `/event/${event.id}`;
                   router.prefetch(href);
 
