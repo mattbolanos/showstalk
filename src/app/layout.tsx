@@ -31,6 +31,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geist.variable} ${geistMono.variable} antialiased`}
+      suppressHydrationWarning
     >
       <head>
         {process.env.NODE_ENV === "development" && (

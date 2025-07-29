@@ -5,7 +5,16 @@ import { api, type RouterOutputs } from "@/trpc/react";
 import { FlameIcon } from "lucide-react";
 
 import { EventCard } from "./event-card";
-import { EventChart } from "./event-chart";
+import { EventChart, TIME_WINDOWS } from "./event-chart";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Skeleton } from "./ui/skeleton";
+import { ChartContainer } from "./ui/chart";
 
 type TrendingEvent = RouterOutputs["events"]["getTrending"][number];
 
@@ -67,6 +76,54 @@ export function HomePage({
               onSelect={() => handleEventClick(event.id)}
               isSelected={selectedEventId === event.id}
             />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function HomePageSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-4 w-30" />
+          </CardTitle>
+          <CardDescription>
+            <Skeleton className="h-5 w-24" />
+          </CardDescription>
+          <div className="flex items-center justify-between gap-4">
+            <Skeleton className="h-4 w-24" />
+            <div className="flex w-full justify-end gap-2">
+              {Object.keys(TIME_WINDOWS).map((timeWindow) => (
+                <Skeleton key={timeWindow} className="size-9 rounded-full" />
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pr-1">
+          <ChartContainer
+            config={{}}
+            className="aspect-auto h-[250px] w-full pr-5"
+          >
+            <Skeleton className="h-full w-full" />
+          </ChartContainer>
+        </CardContent>
+      </Card>
+      <div className="space-y-2">
+        <span className="flex items-center gap-1">
+          <FlameIcon
+            size={28}
+            className="fill-primary stroke-orange-500/20"
+            strokeWidth={2}
+          />
+          <h2 className="text-lg font-bold">Trending</h2>
+        </span>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-15 w-full rounded-md" />
           ))}
         </div>
       </div>

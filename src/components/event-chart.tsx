@@ -25,7 +25,7 @@ import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 
 type EventMeta = RouterOutputs["events"]["getEventMeta"];
 
-const TIME_WINDOWS = {
+export const TIME_WINDOWS = {
   "2W": 14,
   "1M": 30,
   "3M": 90,
@@ -107,7 +107,7 @@ export function EventChart({
     const eventDate = new Date(date);
     const today = new Date();
     const diffTime = Math.abs(eventDate.getTime() - today.getTime());
-    const daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
     return daysAway === 1
       ? "tomorrow"
       : daysAway === 0
@@ -129,7 +129,7 @@ export function EventChart({
         </CardTitle>
         <CardDescription>
           {isLoading ? (
-            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-5 w-24" />
           ) : (
             <>
               <span className="text-primary font-bold uppercase">
@@ -141,22 +141,28 @@ export function EventChart({
         </CardDescription>
         <div className="flex items-center justify-between gap-4">
           {/* Price trend */}
-          <span className="flex items-center gap-2">
-            <p className="font-semibold tabular-nums">
-              {`$${data?.[data.length - 1]?.minPriceTotal}`}
-            </p>
-            <p
-              className={cn(
-                "flex items-center gap-0.5 text-sm font-medium tabular-nums",
-                trend > 0 && "text-emerald-500",
-                trend < 0 && "text-rose-500",
-              )}
-            >
-              {trend > 0 && <ArrowUpIcon className="size-4" />}
-              {trend < 0 && <ArrowDownIcon className="size-4" />}$
-              {Math.abs(trend)}
-            </p>
-          </span>
+          {isLoading ? (
+            <Skeleton className="h-4 w-24" />
+          ) : (
+            <>
+              <span className="flex items-center gap-2">
+                <p className="font-semibold tabular-nums">
+                  {`$${data?.[data.length - 1]?.minPriceTotal}`}
+                </p>
+                <p
+                  className={cn(
+                    "flex items-center gap-0.5 text-sm font-medium tabular-nums",
+                    trend > 0 && "text-emerald-500",
+                    trend < 0 && "text-rose-500",
+                  )}
+                >
+                  {trend > 0 && <ArrowUpIcon className="size-4" />}
+                  {trend < 0 && <ArrowDownIcon className="size-4" />}$
+                  {Math.abs(trend)}
+                </p>
+              </span>
+            </>
+          )}
 
           {/* Time window selector */}
           <div className="flex w-full justify-end gap-2">
@@ -170,7 +176,7 @@ export function EventChart({
                   timeWindow === selectedTimeWindow ? "default" : "ghost"
                 }
                 className={cn(
-                  "h-8 w-9 rounded-lg p-2 text-xs whitespace-nowrap",
+                  "size-9 rounded-full text-xs whitespace-nowrap",
                   timeWindow !== selectedTimeWindow && "hover:bg-primary/10",
                   timeWindow === selectedTimeWindow &&
                     "text-primary-foreground",
@@ -185,7 +191,7 @@ export function EventChart({
       <CardContent className="pr-1">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[250px] w-full pr-5"
         >
           {isLoading ? (
             <Skeleton className="h-full w-full" />

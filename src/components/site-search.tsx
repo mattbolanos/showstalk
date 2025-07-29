@@ -57,7 +57,7 @@ export function SiteSearch() {
     const timer = setTimeout(() => {
       setQuery(value);
       setDebounceLoading(false);
-    }, 100);
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [value]);
@@ -138,7 +138,7 @@ export function SiteSearch() {
             <span className="truncate font-medium">{event.name}</span>
             <p className="text-muted-foreground truncate text-xs tabular-nums">
               {formatVenue(event.venueCity, event.venueState)} •{" "}
-              {event.venueName} • {eventDate.time}
+              {event.venueName}
             </p>
           </div>
         </div>
