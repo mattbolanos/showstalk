@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 
 import { api, type RouterOutputs } from "@/trpc/react";
 
@@ -20,6 +19,7 @@ import { formatVenue } from "./event-card";
 import { LoaderIcon, SearchIcon, TrendingUpIcon } from "lucide-react";
 
 import { useRouter } from "next/navigation";
+import { ArtistImage } from "./artist-image";
 
 type EventResult = RouterOutputs["events"]["searchEvents"][number];
 type TopEvent = RouterOutputs["events"]["getTrending"][number];
@@ -154,7 +154,7 @@ export function SiteSearch() {
     <div className="flex w-full justify-center">
       <Button
         variant="outline"
-        className="ring-input/60 bg-input hover:bg-input/80 relative w-full shrink-0 justify-start p-0 px-3 py-2 ring md:w-100"
+        className="ring-input/60 bg-input hover:bg-input/80 relative w-96 shrink-0 justify-start p-0 px-3 py-2 ring"
         onMouseDown={() => setOpen(true)}
       >
         <span className="text-muted-foreground inline-flex pl-6 text-left text-base">
@@ -173,7 +173,7 @@ export function SiteSearch() {
           Search for an artist or venue...
         </DialogTitle>
         <CommandInput
-          placeholder="Gaga Seattle, Red Rocks, or Phoenix"
+          placeholder="Gaga Seattle, Red Rocks, or Chicago"
           value={value}
           onValueChange={setValue}
           loading={isLoading}
@@ -208,19 +208,14 @@ export function SiteSearch() {
                       }}
                       className="flex items-center gap-3"
                     >
-                      <div className="size-10 overflow-hidden rounded-full">
-                        <Image
-                          src={artist.image ?? ""}
-                          alt={artist.name}
-                          width={40}
-                          height={40}
-                          loading="eager"
-                          className="size-full object-cover"
-                        />
-                      </div>
+                      <ArtistImage
+                        imageUrl={artist.image ?? ""}
+                        artistName={artist.name}
+                        containerClassName="size-10"
+                      />
                       <div className="flex flex-col">
                         <span className="font-medium">{artist.name}</span>
-                        <p className="text-muted-foreground text-sm">
+                        <p className="text-muted-foreground text-xs">
                           {artist.genre}
                         </p>
                       </div>
@@ -249,7 +244,7 @@ export function SiteSearch() {
                   </span>
                 }
               >
-                {topEvents?.slice(0, 3).map((event) => {
+                {topEvents?.slice(0, 5).map((event) => {
                   const href = `/event/${event.id}`;
                   router.prefetch(href);
 

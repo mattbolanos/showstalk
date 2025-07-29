@@ -95,10 +95,19 @@ export function HomePageSkeleton() {
             <Skeleton className="h-5 w-24" />
           </CardDescription>
           <div className="flex items-center justify-between gap-4">
-            <Skeleton className="h-4 w-24" />
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="flex items-center gap-1">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-12" />
+              </span>
+              <Skeleton className="h-3 w-24" />
+            </div>
             <div className="flex w-full justify-end gap-2">
               {Object.keys(TIME_WINDOWS).map((timeWindow) => (
-                <Skeleton key={timeWindow} className="size-9 rounded-full" />
+                <Skeleton
+                  key={timeWindow}
+                  className="size-7 rounded-full sm:size-9"
+                />
               ))}
             </div>
           </div>

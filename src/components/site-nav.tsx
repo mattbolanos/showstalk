@@ -8,7 +8,7 @@ import Link from "next/link";
 export function SiteNav() {
   return (
     <header className="border-b px-4 md:px-6">
-      <div className="flex h-13 items-center">
+      <div className="mx-auto flex h-13 max-w-screen-lg items-center">
         <Link
           prefetch
           href="/"

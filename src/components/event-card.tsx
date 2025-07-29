@@ -1,7 +1,8 @@
 import type { RouterOutputs } from "@/trpc/react";
-import Image from "next/image";
 
 import { cn } from "@/lib/utils";
+import { MapPinIcon } from "lucide-react";
+import { ArtistImage } from "./artist-image";
 
 type Event = RouterOutputs["events"]["getTrending"][number];
 
@@ -50,19 +51,15 @@ export function EventCard({
       )}
     >
       <div className="flex items-center">
-        <div className="bg-muted mr-3 size-11 overflow-hidden rounded-lg">
-          <Image
-            src={event.artistImage}
-            alt={event.artistName}
-            width={44}
-            height={44}
-            loading="eager"
-            className="size-full object-cover"
-          />
-        </div>
+        <ArtistImage
+          imageUrl={event.artistImage}
+          artistName={event.artistName}
+          containerClassName="mr-3 size-11"
+        />
         <div>
           <h2 className="font-medium">{event.artistName}</h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground flex items-center text-sm">
+            <MapPinIcon className="mr-0.5 size-3" />
             {formatVenue(
               event.venueCity,
               event.venueState,

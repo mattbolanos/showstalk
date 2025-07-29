@@ -26,11 +26,11 @@ import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 type EventMeta = RouterOutputs["events"]["getEventMeta"];
 
 export const TIME_WINDOWS = {
-  "2W": 14,
-  "1M": 30,
-  "3M": 90,
-  "6M": 180,
-  ALL: -1,
+  "2W": { days: 14, description: "Past 2 Weeks" },
+  "1M": { days: 30, description: "Past Month" },
+  "3M": { days: 90, description: "Past 3 Months" },
+  "6M": { days: 180, description: "Past 6 Months" },
+  ALL: { days: -1, description: "All Time" },
 };
 
 const chartConfig = {
@@ -62,7 +62,7 @@ export function EventChart({
       const date = new Date(metric.fetchDate);
       const diffTime = Math.abs(date.getTime() - new Date().getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays <= TIME_WINDOWS[selectedTimeWindow];
+      return diffDays <= TIME_WINDOWS[selectedTimeWindow].days;
     });
   }, [eventMetrics, selectedTimeWindow]);
 
@@ -142,16 +142,22 @@ export function EventChart({
         <div className="flex items-center justify-between gap-4">
           {/* Price trend */}
           {isLoading ? (
-            <Skeleton className="h-4 w-24" />
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="flex items-center gap-1">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-12" />
+              </span>
+              <Skeleton className="h-3 w-24" />
+            </div>
           ) : (
-            <>
-              <span className="flex items-center gap-2">
-                <p className="font-semibold tabular-nums">
+            <div className="flex w-full flex-col sm:flex-row sm:items-center sm:gap-1.5">
+              <span className="flex items-center gap-1">
+                <p className="text-sm font-semibold tabular-nums sm:text-base">
                   {`$${data?.[data.length - 1]?.minPriceTotal}`}
                 </p>
                 <p
                   className={cn(
-                    "flex items-center gap-0.5 text-sm font-medium tabular-nums",
+                    "flex items-center text-sm font-medium tabular-nums",
                     trend > 0 && "text-emerald-500",
                     trend < 0 && "text-rose-500",
                   )}
@@ -161,7 +167,10 @@ export function EventChart({
                   {Math.abs(trend)}
                 </p>
               </span>
-            </>
+              <span className="text-muted-foreground text-xs font-medium">
+                {TIME_WINDOWS[selectedTimeWindow].description}
+              </span>
+            </div>
           )}
 
           {/* Time window selector */}
@@ -176,7 +185,7 @@ export function EventChart({
                   timeWindow === selectedTimeWindow ? "default" : "ghost"
                 }
                 className={cn(
-                  "size-9 rounded-full text-xs whitespace-nowrap",
+                  "size-7 rounded-full text-xs whitespace-nowrap sm:size-9",
                   timeWindow !== selectedTimeWindow && "hover:bg-primary/10",
                   timeWindow === selectedTimeWindow &&
                     "text-primary-foreground",
