@@ -279,11 +279,19 @@ export function EventChart({
                     }}
                     indicator="dot"
                     formatter={(value) => {
-                      return `Starting At: ${value.toLocaleString("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                        notation: "compact",
-                      })}`;
+                      return (
+                        <>
+                          Starting At:{" "}
+                          <span className="font-medium">
+                            {value.toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "USD",
+                              maximumFractionDigits: 0,
+                              useGrouping: true,
+                            })}
+                          </span>
+                        </>
+                      );
                     }}
                   />
                 }
