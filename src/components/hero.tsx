@@ -21,8 +21,7 @@ export function Hero() {
                   concerts
                 </span>
                 <div className="absolute right-0 -bottom-0.5 left-0 h-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 opacity-60"></div>
-              </span>{" "}
-              again
+              </span>
             </h1>
             <p className="text-muted-foreground mb-4 text-lg leading-relaxed sm:text-xl lg:text-2xl">
               Know when to buy. Know when to sell.
