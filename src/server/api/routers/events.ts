@@ -20,6 +20,7 @@ import {
 import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
+const twoWeeksPriorFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics} WHERE DATE(${eventMetrics.fetchDate}) <= DATE((SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})) - 7)`;
 
 const rowNumber =
   sql<number>`ROW_NUMBER() OVER (PARTITION BY ${eventMetrics.eventId})`.as(
@@ -49,9 +50,18 @@ export const eventsRouter = createTRPCRouter({
       .limit(20)
       .as("top_artists");
 
+    const pastPricesSubquery = ctx.db
+      .select({
+        eventId: eventMetrics.eventId,
+        pastMinPrice: eventMetrics.minPriceTotal,
+      })
+      .from(eventMetrics)
+      .where(sql`${eventMetrics.fetchDate} = ${twoWeeksPriorFetchDateSubquery}`)
+      .as("past_prices");
+
     // Main query combining both CTEs
     const shows = ctx.db
-      .with(topArtistsSubquery)
+      .with(topArtistsSubquery, pastPricesSubquery)
       .select({
         id: eventMetrics.eventId,
         name: sql<string>`${eventMeta.name}`.as("name"),
@@ -74,6 +84,10 @@ export const eventsRouter = createTRPCRouter({
         minPriceTotal: sql<number>`${eventMetrics.minPriceTotal}`.as(
           "min_price_total",
         ),
+        weekChange:
+          sql<number>`${eventMetrics.minPriceTotal} - ${pastPricesSubquery.pastMinPrice}`.as(
+            "week_change",
+          ),
         updatedAt: sql<string>`${eventMeta.updatedAt}`.as("updated_at"),
         rowNum: rowNumber,
       })
@@ -83,6 +97,10 @@ export const eventsRouter = createTRPCRouter({
         topArtistsSubquery,
         sql`${topArtistsSubquery.id} = ${eventArtists.artistId} AND 
           ${topArtistsSubquery.maxPop} = ${eventMetrics.popularityScore}`,
+      )
+      .leftJoin(
+        pastPricesSubquery,
+        eq(pastPricesSubquery.eventId, eventMetrics.eventId),
       )
       .leftJoin(eventMeta, eq(eventMeta.id, eventMetrics.eventId))
       .where(

@@ -61,7 +61,7 @@ export function EventChart({
     return eventMetrics.filter((metric) => {
       const date = new Date(metric.fetchDate);
       const diffTime = Math.abs(date.getTime() - new Date().getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 2;
       return diffDays <= TIME_WINDOWS[selectedTimeWindow].days;
     });
   }, [eventMetrics, selectedTimeWindow]);

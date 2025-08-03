@@ -1,13 +1,27 @@
+"use client";
+
+import * as React from "react";
 import {
-  ArrowDownIcon,
-  ArrowUpIcon,
   AudioLinesIcon,
   GuitarIcon,
   MusicIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
-export function Hero() {
+import { type RouterOutputs } from "@/trpc/react";
+import { cn } from "@/lib/utils";
+
+import Link from "next/link";
+
+export function Hero({
+  trendingEventsPromise,
+}: {
+  trendingEventsPromise: Promise<RouterOutputs["events"]["getTrending"]>;
+}) {
+  const trendingEvents = React.use(trendingEventsPromise);
+
   return (
     <section className="relative w-full overflow-hidden py-4 lg:py-12">
       <div className="container mx-auto px-4">
@@ -20,7 +34,7 @@ export function Hero() {
                 <span className="bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
                   concerts
                 </span>
-                <div className="absolute right-0 -bottom-0.5 left-0 h-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 opacity-60"></div>
+                <div className="absolute right-0 -bottom-0.5 left-0 h-1 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 opacity-60" />
               </span>
             </h1>
             <p className="text-muted-foreground mb-4 text-lg leading-relaxed sm:text-xl lg:text-2xl">
@@ -32,7 +46,7 @@ export function Hero() {
                 className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none"
               >
                 <span className="relative z-10">Get Started</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </a>
             </div>
           </div>
@@ -40,11 +54,11 @@ export function Hero() {
           {/* Visual Section */}
           <div className="relative h-96 w-full max-w-lg lg:h-110">
             {/* Background Glow */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/20 to-purple-600/20 blur-3xl"></div>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/30 to-purple-600/30 blur-3xl dark:from-pink-500/20 dark:to-purple-600/20" />
 
             {/* Floating Music Icons */}
             <div className="pointer-events-none absolute inset-0 z-20">
-              <div className="animate-drift absolute top-[12%] right-[38%] -rotate-12 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg [animation-delay:0.5s]">
+              <div className="animate-drift absolute top-[9%] right-[42%] -rotate-12 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg [animation-delay:0.5s]">
                 <MusicIcon className="size-6 stroke-white stroke-2" />
               </div>
               <div className="animate-drift absolute top-[35%] left-[15%] rotate-[15deg] rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg [animation-delay:2.5s]">
@@ -153,27 +167,26 @@ export function Hero() {
             </svg>
 
             {/* Price Ticker Cards */}
-            <PriceTicker
-              artist="Taylor Swift"
-              price={347}
-              change={-23}
-              changeText="today"
-              className="animate-float absolute top-2 left-2 rotate-2"
-            />
-            <PriceTicker
-              artist="The Weeknd"
-              price={189}
-              change={12}
-              changeText="this week"
-              className="animate-float absolute top-16 right-4 rotate-6 [animation-delay:2s]"
-            />
-            <PriceTicker
-              artist="Billie Eilish"
-              price={156}
-              change={8}
-              changeText="this hour"
-              className="animate-float absolute bottom-16 left-6 -rotate-3 [animation-delay:4s]"
-            />
+            {trendingEvents
+              .sort((a, b) => a.weekChange - b.weekChange)
+              .slice(0, 3)
+              .map((event, index) => (
+                <PriceTicker
+                  key={event.artistName}
+                  eventId={event.id}
+                  artist={event.artistName}
+                  price={event.minPriceTotal}
+                  change={event.weekChange}
+                  className={cn(
+                    "animate-float absolute",
+                    index === 0 && "top-2 left-6 -rotate-8 hover:ring-pink-500",
+                    index === 1 &&
+                      "top-22 right-4 rotate-5 [animation-delay:2s] hover:ring-purple-500",
+                    index === 2 &&
+                      "bottom-19 left-12 rotate-4 [animation-delay:4s] hover:ring-indigo-500",
+                  )}
+                />
+              ))}
           </div>
         </div>
       </div>
@@ -183,41 +196,46 @@ export function Hero() {
 
 function PriceTicker({
   artist,
+  eventId,
   price,
   change,
-  changeText,
   className,
 }: {
   artist: string;
+  eventId: string;
   price: number;
   change: number;
-  changeText: string;
   className?: string;
 }) {
   const isUp = change > 0;
 
   return (
     <Card
-      className={`z-20 w-36 gap-0 p-0 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-xl ${className}`}
+      className={`z-20 w-36 gap-0 border-none p-0 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-2 ${className}`}
     >
-      <CardHeader className="p-3 pb-0">
-        <CardTitle className="truncate text-sm font-semibold">
-          {artist}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-3 pt-0">
-        <div className="mb-1 text-xl font-bold">${price}</div>
-        <div
-          className={`flex items-center gap-1 text-xs font-medium ${isUp ? "text-emerald-600" : "text-red-500"}`}
-        >
-          {isUp ? (
-            <ArrowUpIcon className="h-3 w-3" />
-          ) : (
-            <ArrowDownIcon className="h-3 w-3" />
+      <Link
+        href={`/event/${eventId}`}
+        prefetch={true}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <CardContent className="space-y-1 p-3">
+          <p className="text-sm font-semibold">{artist}</p>
+          <p className="text-xl font-bold">${price}</p>
+          {change !== 0 && (
+            <div
+              className={`flex items-center gap-1 text-xs font-medium ${isUp ? "text-emerald-600" : "text-red-500"}`}
+            >
+              {isUp ? (
+                <TrendingUpIcon className="size-3" />
+              ) : (
+                <TrendingDownIcon className="size-3" />
+              )}
+              ${Math.abs(change)} this week
+            </div>
           )}
-          ${Math.abs(change)} {changeText}
-        </div>
-      </CardContent>
+        </CardContent>
+      </Link>
     </Card>
   );
 }
