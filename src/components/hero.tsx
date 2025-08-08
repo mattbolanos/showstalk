@@ -5,6 +5,7 @@ import {
   AudioLinesIcon,
   GuitarIcon,
   MusicIcon,
+  SearchIcon,
   TrendingDownIcon,
   TrendingUpIcon,
 } from "lucide-react";
@@ -14,6 +15,8 @@ import { type RouterOutputs } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 
 import Link from "next/link";
+import { useSearch } from "@/stores/use-search";
+import { Button } from "./ui/button";
 
 export function Hero({
   trendingEventsPromise,
@@ -21,6 +24,11 @@ export function Hero({
   trendingEventsPromise: Promise<RouterOutputs["events"]["getTrending"]>;
 }) {
   const trendingEvents = React.use(trendingEventsPromise);
+  const setSearchOpen = useSearch((state) => state.setSearchOpen);
+
+  const handleGetStarted = () => {
+    setSearchOpen(true);
+  };
 
   return (
     <section className="relative w-full overflow-hidden py-4 lg:py-12">
@@ -41,13 +49,14 @@ export function Hero({
               Know when to buy. Know when to sell.
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row sm:gap-6 lg:justify-start">
-              <a
-                href="#demo"
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-pink-500 to-purple-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none"
+              <Button
+                onMouseDown={handleGetStarted}
+                size="lg"
+                className="h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-lg font-semibold shadow-lg transition-all duration-300 hover:scale-105 hover:from-pink-600 hover:to-purple-700 hover:shadow-xl"
               >
-                <span className="relative z-10">Get Started</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              </a>
+                <SearchIcon className="size-5" />
+                Get Started
+              </Button>
             </div>
           </div>
 
@@ -224,7 +233,7 @@ function PriceTicker({
           <p className="text-xl font-bold">${price}</p>
           {change !== 0 && (
             <div
-              className={`flex items-center gap-1 text-xs font-medium ${isUp ? "text-emerald-600" : "text-red-500"}`}
+              className={`flex items-center gap-1 text-xs font-medium ${isUp ? "text-red-600" : "text-emerald-500"}`}
             >
               {isUp ? (
                 <TrendingUpIcon className="size-3" />

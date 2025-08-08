@@ -17,8 +17,9 @@ import {
 import { DialogTitle } from "./ui/dialog";
 import { formatVenue } from "./event-card";
 import { LoaderIcon, SearchIcon, TrendingUpIcon } from "lucide-react";
-
+import { useSearch } from "@/stores/use-search";
 import { useRouter } from "next/navigation";
+
 import { ArtistImage } from "./artist-image";
 
 type EventResult = RouterOutputs["events"]["searchEvents"][number];
@@ -47,7 +48,7 @@ const formatEventDate = (localDatetime: string) => {
 
 export function SiteSearch() {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
+  const { searchOpen, setSearchOpen } = useSearch();
   const [value, setValue] = React.useState("");
   const [query, setQuery] = React.useState("");
   const [debounceLoading, setDebounceLoading] = React.useState(false);
@@ -66,12 +67,12 @@ export function SiteSearch() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault();
-        setOpen(true);
+        setSearchOpen(true);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [setSearchOpen]);
 
   const { data: topEvents } = api.events.getTrending.useQuery();
 
@@ -83,7 +84,7 @@ export function SiteSearch() {
     {
       query,
     },
-    { enabled: open && !!query, queryHash: query },
+    { enabled: searchOpen && !!query, queryHash: query },
   );
 
   const {
@@ -94,7 +95,7 @@ export function SiteSearch() {
     {
       query,
     },
-    { enabled: open && !!query },
+    { enabled: searchOpen && !!query },
   );
 
   const isLoading = artistsLoading || debounceLoading || eventsLoading;
@@ -105,7 +106,7 @@ export function SiteSearch() {
 
   const handleSelect = (href: string) => {
     router.push(href);
-    setOpen(false);
+    setSearchOpen(false);
     setValue("");
     setQuery("");
   };
@@ -155,7 +156,7 @@ export function SiteSearch() {
       <Button
         variant="outline"
         className="ring-input/60 bg-input hover:bg-input/80 relative w-96 shrink-0 justify-start p-0 px-3 py-2 ring"
-        onMouseDown={() => setOpen(true)}
+        onMouseDown={() => setSearchOpen(true)}
       >
         <span className="text-muted-foreground inline-flex pl-6 text-left text-base">
           Search for an artist or location...
@@ -168,7 +169,7 @@ export function SiteSearch() {
         </div>
       </Button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
         <DialogTitle className="sr-only">
           Search for an artist or venue...
         </DialogTitle>

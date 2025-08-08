@@ -158,8 +158,8 @@ export function EventChart({
                 <p
                   className={cn(
                     "flex items-center text-sm font-medium tabular-nums",
-                    trend > 0 && "text-emerald-500",
-                    trend < 0 && "text-rose-500",
+                    trend < 0 && "text-emerald-500",
+                    trend > 0 && "text-rose-500",
                   )}
                 >
                   {trend > 0 && <ArrowUpIcon className="size-4" />}
