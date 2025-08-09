@@ -4,13 +4,6 @@ import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Button } from "./ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
-import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
@@ -116,18 +109,18 @@ export function EventChart({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
+    <div>
+      <div className="flex flex-col gap-2 p-6">
+        <div>
           {isLoading ? (
             <Skeleton className="h-4 w-30" />
           ) : (
-            <>
+            <h3 className="text-lg font-semibold">
               {eventMeta?.name} @ {eventMeta?.venueName}, {eventMeta?.venueCity}
-            </>
+            </h3>
           )}
-        </CardTitle>
-        <CardDescription>
+        </div>
+        <div className="text-muted-foreground text-sm">
           {isLoading ? (
             <Skeleton className="h-5 w-24" />
           ) : (
@@ -138,7 +131,7 @@ export function EventChart({
               • Get-in price w/ fees
             </>
           )}
-        </CardDescription>
+        </div>
         <div className="flex items-center justify-between gap-4">
           {/* Price trend */}
           {isLoading ? (
@@ -196,8 +189,8 @@ export function EventChart({
             ))}
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="pr-1">
+      </div>
+      <div className="px-6 pb-6">
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[250px] w-full pr-1"
@@ -306,7 +299,7 @@ export function EventChart({
             </AreaChart>
           )}
         </ChartContainer>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
