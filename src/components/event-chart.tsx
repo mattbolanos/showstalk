@@ -2,14 +2,10 @@
 
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import {
-  type ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "./ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "./ui/chart";
 
 import { cn } from "@/lib/utils";
+import { useTimeWindow } from "@/stores/use-time-window";
 
 export const TIME_WINDOWS = {
   "2W": { days: 14, description: "Past 2 Weeks" },
@@ -25,23 +21,37 @@ export function EventChart({
   trendDirection,
 }: {
   eventMetrics: {
-    fetchDate: string;
+    fetchDate: Date;
     minPriceTotal: number;
   }[];
   version?: "icon" | "full";
   trendDirection: "good" | "bad";
 }) {
-  const { spread, ticks } = React.useMemo(() => {
-    if (eventMetrics.length < 2) return { spread: 0, ticks: [] };
+  const timeWindow = useTimeWindow((state) => state.timeWindow);
 
-    const { min, max } = eventMetrics.reduce(
+  const data = React.useMemo(() => {
+    if (timeWindow === "ALL") return eventMetrics;
+
+    return eventMetrics?.filter((metric) => {
+      const diffTime = Math.abs(
+        new Date(metric.fetchDate).getTime() - new Date().getTime(),
+      );
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 2;
+      return diffDays <= TIME_WINDOWS[timeWindow].days;
+    });
+  }, [eventMetrics, timeWindow]);
+
+  const { spread, ticks } = React.useMemo(() => {
+    if (data.length < 2) return { spread: 0, ticks: [] };
+
+    const { min, max } = data.reduce(
       (acc, d) => ({
         min: Math.min(acc.min, d.minPriceTotal),
         max: Math.max(acc.max, d.minPriceTotal),
       }),
       {
-        min: eventMetrics[0]?.minPriceTotal ?? 0,
-        max: eventMetrics[0]?.minPriceTotal ?? 0,
+        min: data[0]?.minPriceTotal ?? 0,
+        max: data[0]?.minPriceTotal ?? 0,
       },
     );
 
@@ -61,22 +71,10 @@ export function EventChart({
       spread: rawSpread,
       ticks: tickValues,
     };
-  }, [eventMetrics]);
-
-  const getDaysUntilEvent = (date: string): string => {
-    const eventDate = new Date(date);
-    const today = new Date();
-    const diffTime = Math.abs(eventDate.getTime() - today.getTime());
-    const daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
-    return daysAway === 1
-      ? "tomorrow"
-      : daysAway === 0
-        ? "today"
-        : `${daysAway} days away`;
-  };
+  }, [data]);
 
   return (
-    <div className={cn("px-6 pb-6", version === "icon" && "p-0")}>
+    <div className={cn("px-2 pr-0 pb-6", version === "icon" && "p-0")}>
       <ChartContainer
         config={{
           minPriceTotal: {
@@ -85,10 +83,10 @@ export function EventChart({
         }}
         className={cn(
           "aspect-auto h-[250px] w-full pr-1",
-          version === "icon" && "h-10 w-20 pr-0",
+          version === "icon" && "-my-2 h-12 w-25 pr-0",
         )}
       >
-        <AreaChart data={eventMetrics}>
+        <AreaChart data={data}>
           <defs>
             <linearGradient
               id="fillMinPriceTotalGood"
@@ -128,7 +126,11 @@ export function EventChart({
               />
             </linearGradient>
           </defs>
-          {version === "full" && <CartesianGrid vertical={false} />}
+          <CartesianGrid
+            vertical={false}
+            className={cn(version === "icon" && "hidden")}
+          />
+
           {version === "full" && (
             <YAxis
               dataKey="minPriceTotal"

@@ -10,7 +10,9 @@ export default function Home() {
   return (
     <div className="mx-auto flex min-h-screen max-w-screen-xl flex-col space-y-4">
       <Hero trendingEventsPromise={api.events.getTrending()} />
-      <FeaturedEvents trendingEventsPromise={api.events.getTrending()} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <FeaturedEvents trendingEventsPromise={api.events.getTrending()} />
+      </Suspense>
     </div>
   );
 }

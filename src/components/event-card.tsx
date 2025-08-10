@@ -27,6 +27,7 @@ const formatPercentChange = (percentChange: number) => {
     style: "percent",
     signDisplay: "always",
     maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
   });
 };
 
@@ -51,17 +52,6 @@ export function EventCard({
     eventId: event.id,
     windowDays: TIME_WINDOWS[selectedTimeWindow].days,
   });
-
-  const data = React.useMemo(() => {
-    if (selectedTimeWindow === "ALL") return eventMetrics;
-
-    return eventMetrics?.filter((metric) => {
-      const date = new Date(metric.fetchDate);
-      const diffTime = Math.abs(date.getTime() - new Date().getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 2;
-      return diffDays <= TIME_WINDOWS[selectedTimeWindow].days;
-    });
-  }, [eventMetrics, selectedTimeWindow]);
 
   return (
     <div
@@ -106,7 +96,7 @@ export function EventCard({
         </div>
 
         <EventChart
-          eventMetrics={data ?? []}
+          eventMetrics={eventMetrics ?? []}
           trendDirection={
             eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
               ? "good"

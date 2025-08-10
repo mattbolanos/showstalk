@@ -101,7 +101,7 @@ export const eventsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       return ctx.db
         .select({
-          fetchDate: eventMetrics.fetchDate,
+          fetchDate: sql<Date>`${eventMetrics.fetchDate}`.as("fetch_date"),
           minPriceTotal:
             sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
               "min_price_total",
@@ -139,24 +139,30 @@ export const eventsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const latestDate = await ctx.db
         .select({
-          latest: sql<Date>`MAX(${eventMetrics.fetchDate})`.as("latest"),
+          latest: sql<string>`MAX(${eventMetrics.fetchDate})`.as("latest"),
+          minDate: sql<string>`MIN(${eventMetrics.fetchDate})`.as("min_date"),
         })
         .from(eventMetrics)
         .where(eq(eventMetrics.eventId, input.eventId))
-        .then((rows) => rows[0]?.latest);
+        .then((rows) => rows[0]);
 
       if (!latestDate) return null;
 
+      console.log(latestDate);
+
       const comparisonDate =
         input.windowDays === -1
-          ? sql`MIN(${eventMetrics.fetchDate})`
-          : new Date(
-              new Date(latestDate).setDate(
-                new Date(latestDate).getDate() - input.windowDays,
-              ),
-            )
-              .toISOString()
-              .split("T")[0];
+          ? latestDate.minDate
+          : (() => {
+              const targetDate = new Date(latestDate.latest);
+              targetDate.setDate(targetDate.getDate() - input.windowDays);
+              const targetDateStr = targetDate.toISOString().split("T")[0];
+
+              // If target date is before minDate, use minDate instead
+              return targetDate < new Date(latestDate.minDate)
+                ? latestDate.minDate
+                : targetDateStr;
+            })();
 
       const comparisonPriceQuery = ctx.db
         .select({
@@ -185,7 +191,7 @@ export const eventsRouter = createTRPCRouter({
         .where(
           and(
             eq(eventMetrics.eventId, input.eventId),
-            sql`${eventMetrics.fetchDate} = ${latestDate}`,
+            sql`${eventMetrics.fetchDate} = ${latestDate.latest}`,
           ),
         )
         .as("latest_price");
