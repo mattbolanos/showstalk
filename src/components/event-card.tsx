@@ -45,9 +45,9 @@ export function EventCard({
       key={event.id}
       onMouseDown={onSelect}
       className={cn(
-        "flex cursor-pointer justify-between rounded-md p-2 transition-all duration-100",
-        isSelected && "bg-primary/15 ring-primary ring",
-        !isSelected && "hover:bg-primary/10",
+        "flex cursor-pointer justify-between p-2 transition-all duration-100",
+        isSelected && "bg-primary/20",
+        !isSelected && "hover:bg-primary/5",
       )}
     >
       <div className="flex items-center">

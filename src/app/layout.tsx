@@ -52,7 +52,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <SiteNav />
-              <main className="mx-auto w-full max-w-[var(--breakpoint-2xl)] px-3 py-8">
+              <main className="mx-auto w-full max-w-screen-xl px-3 py-8">
                 {children}
               </main>
             </ThemeProvider>
