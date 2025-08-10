@@ -7,10 +7,10 @@ import Link from "next/link";
 
 export function SiteNav() {
   return (
-    <header className="border-b px-4 md:px-6">
+    <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 border-b px-4 backdrop-blur md:px-6">
       <div className="mx-auto flex h-14 max-w-screen-xl items-center">
         <Link
-          prefetch
+          prefetch={true}
           href="/"
           className="flex flex-1 items-center justify-center gap-1 hover:opacity-80"
         >

@@ -8,6 +8,7 @@ import {
   boolean,
   index,
   integer,
+  date,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -78,6 +79,7 @@ export const eventArtists = ticketSchema.table(
       columns: [t.eventId],
       foreignColumns: [eventMeta.id],
     }),
+    index("event_artists_artist_id_idx").on(t.artistId),
   ],
 );
 
@@ -85,7 +87,7 @@ export const eventMetrics = ticketSchema.table(
   "event_metrics",
   {
     eventId: text("event_id").notNull(),
-    fetchDate: text("fetch_date").notNull(),
+    fetchDate: date("fetch_date").notNull(),
     minPriceTotal: integer("min_price_total").notNull(),
     minPricePrefee: integer("min_price_prefee").notNull(),
     searchScore: numeric("search_score"),
@@ -102,6 +104,11 @@ export const eventMetrics = ticketSchema.table(
     index("event_metrics_event_id_popularity_score_idx").on(
       t.eventId,
       t.popularityScore,
+    ),
+    index("event_metrics_fetch_date_popularity_score_event_id_idx").on(
+      t.fetchDate,
+      t.popularityScore,
+      t.eventId,
     ),
   ],
 );

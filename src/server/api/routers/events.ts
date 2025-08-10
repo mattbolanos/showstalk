@@ -20,7 +20,6 @@ import {
 import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
-const twoWeeksPriorFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics} WHERE DATE(${eventMetrics.fetchDate}) <= DATE((SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})) - 7)`;
 
 const rowNumber =
   sql<number>`ROW_NUMBER() OVER (PARTITION BY ${eventMetrics.eventId})`.as(
@@ -36,9 +35,9 @@ export const eventsRouter = createTRPCRouter({
         image: artists.image,
         maxPop: sql<number>`MAX(${eventMetrics.popularityScore})`.as("max_pop"),
       })
-      .from(artists)
-      .leftJoin(eventArtists, eq(eventArtists.artistId, artists.id))
-      .leftJoin(eventMetrics, eq(eventMetrics.eventId, eventArtists.eventId))
+      .from(eventArtists)
+      .innerJoin(eventMetrics, eq(eventMetrics.eventId, eventArtists.eventId))
+      .innerJoin(artists, eq(eventArtists.artistId, artists.id))
       .where(
         and(
           isNotNull(eventMetrics.popularityScore),
@@ -50,18 +49,9 @@ export const eventsRouter = createTRPCRouter({
       .limit(20)
       .as("top_artists");
 
-    const pastPricesSubquery = ctx.db
-      .select({
-        eventId: eventMetrics.eventId,
-        pastMinPrice: eventMetrics.minPriceTotal,
-      })
-      .from(eventMetrics)
-      .where(sql`${eventMetrics.fetchDate} = ${twoWeeksPriorFetchDateSubquery}`)
-      .as("past_prices");
-
     // Main query combining both CTEs
     const shows = ctx.db
-      .with(topArtistsSubquery, pastPricesSubquery)
+      .with(topArtistsSubquery)
       .select({
         id: eventMetrics.eventId,
         name: sql<string>`${eventMeta.name}`.as("name"),
@@ -84,29 +74,18 @@ export const eventsRouter = createTRPCRouter({
         minPriceTotal: sql<number>`${eventMetrics.minPriceTotal}`.as(
           "min_price_total",
         ),
-        weekChange:
-          sql<number>`${eventMetrics.minPriceTotal} - ${pastPricesSubquery.pastMinPrice}`.as(
-            "week_change",
-          ),
+
         updatedAt: sql<string>`${eventMeta.updatedAt}`.as("updated_at"),
         rowNum: rowNumber,
       })
       .from(eventMetrics)
-      .leftJoin(eventArtists, eq(eventArtists.eventId, eventMetrics.eventId))
-      .leftJoin(
+      .innerJoin(eventArtists, eq(eventArtists.eventId, eventMetrics.eventId))
+      .innerJoin(
         topArtistsSubquery,
-        sql`${topArtistsSubquery.id} = ${eventArtists.artistId} AND 
-          ${topArtistsSubquery.maxPop} = ${eventMetrics.popularityScore}`,
+        sql`${topArtistsSubquery.id} = ${eventArtists.artistId} AND ${topArtistsSubquery.maxPop} = ${eventMetrics.popularityScore}`,
       )
-      .leftJoin(
-        pastPricesSubquery,
-        eq(pastPricesSubquery.eventId, eventMetrics.eventId),
-      )
-      .leftJoin(eventMeta, eq(eventMeta.id, eventMetrics.eventId))
-      .where(
-        sql`${topArtistsSubquery.id} IS NOT NULL AND 
-          ${eventMetrics.fetchDate} = ${latestFetchDateSubquery}`,
-      )
+      .innerJoin(eventMeta, eq(eventMeta.id, eventMetrics.eventId))
+      .where(sql`${eventMetrics.fetchDate} = ${latestFetchDateSubquery}`)
       .orderBy(desc(topArtistsSubquery.maxPop))
       .as("shows");
 
@@ -145,12 +124,88 @@ export const eventsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return ctx.db
-        .select()
-        .from(eventMeta)
-        .where(eq(eventMeta.id, input.eventId))
-        .limit(1)
-        .then((event) => event[0]);
+      return ctx.db.query.eventMeta.findFirst({
+        where: eq(eventMeta.id, input.eventId),
+      });
+    }),
+
+  getEventPriceChange: publicProcedure
+    .input(
+      z.object({
+        eventId: z.string(),
+        windowDays: z.number().int().min(-1),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const latestDate = await ctx.db
+        .select({
+          latest: sql<Date>`MAX(${eventMetrics.fetchDate})`.as("latest"),
+        })
+        .from(eventMetrics)
+        .where(eq(eventMetrics.eventId, input.eventId))
+        .then((rows) => rows[0]?.latest);
+
+      if (!latestDate) return null;
+
+      const comparisonDate =
+        input.windowDays === -1
+          ? sql`MIN(${eventMetrics.fetchDate})`
+          : new Date(
+              new Date(latestDate).setDate(
+                new Date(latestDate).getDate() - input.windowDays,
+              ),
+            )
+              .toISOString()
+              .split("T")[0];
+
+      const comparisonPriceQuery = ctx.db
+        .select({
+          minPriceTotal:
+            sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
+              "min_price_total",
+            ),
+        })
+        .from(eventMetrics)
+        .where(
+          and(
+            eq(eventMetrics.eventId, input.eventId),
+            sql`${eventMetrics.fetchDate} = ${comparisonDate}`,
+          ),
+        )
+        .as("comparison_date");
+
+      const latestPriceQuery = ctx.db
+        .select({
+          currentPrice:
+            sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
+              "current_price",
+            ),
+        })
+        .from(eventMetrics)
+        .where(
+          and(
+            eq(eventMetrics.eventId, input.eventId),
+            sql`${eventMetrics.fetchDate} = ${latestDate}`,
+          ),
+        )
+        .as("latest_price");
+
+      return await ctx.db
+        .select({
+          currentPrice: latestPriceQuery.currentPrice,
+          rawChange:
+            sql<number>`${latestPriceQuery.currentPrice} - ${comparisonPriceQuery.minPriceTotal}`.as(
+              "raw_change",
+            ),
+          percentChange: sql<number>`CASE 
+            WHEN ${comparisonPriceQuery.minPriceTotal} > 0 
+            THEN CAST((${latestPriceQuery.currentPrice} - ${comparisonPriceQuery.minPriceTotal})::FLOAT / ${comparisonPriceQuery.minPriceTotal}::FLOAT AS FLOAT)
+            ELSE 0 
+          END`.as("percent_change"),
+        })
+        .from(latestPriceQuery)
+        .leftJoin(comparisonPriceQuery, sql`true`)
+        .then((rows) => rows[0]);
     }),
 
   searchArtists: publicProcedure

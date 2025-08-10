@@ -43,6 +43,13 @@
       "when": 1753761437699,
       "tag": "0005_elite_machine_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1754854147982,
+      "tag": "0006_loud_donald_blake",
+      "breakpoints": true
     }
   ]
 }

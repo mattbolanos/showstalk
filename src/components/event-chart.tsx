@@ -2,21 +2,14 @@
 
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { Button } from "./ui/button";
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "./ui/chart";
-import { Skeleton } from "./ui/skeleton";
-
-import type { RouterOutputs } from "@/trpc/react";
 
 import { cn } from "@/lib/utils";
-import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
-
-type EventMeta = RouterOutputs["events"]["getEventMeta"];
 
 export const TIME_WINDOWS = {
   "2W": { days: 14, description: "Past 2 Weeks" },
@@ -26,56 +19,30 @@ export const TIME_WINDOWS = {
   ALL: { days: -1, description: "All Time" },
 };
 
-const chartConfig = {
-  minPriceTotal: {
-    label: "Min Price Total",
-    color: "var(--color-primary)",
-  },
-} satisfies ChartConfig;
-
 export function EventChart({
   eventMetrics,
-  eventMeta,
-  isLoading,
+  version,
+  trendDirection,
 }: {
   eventMetrics: {
     fetchDate: string;
     minPriceTotal: number;
   }[];
-  eventMeta: EventMeta;
-  isLoading?: boolean;
+  version?: "icon" | "full";
+  trendDirection: "good" | "bad";
 }) {
-  const [selectedTimeWindow, setSelectedTimeWindow] =
-    React.useState<keyof typeof TIME_WINDOWS>("1M");
-
-  const data = React.useMemo(() => {
-    if (selectedTimeWindow === "ALL") return eventMetrics;
-
-    return eventMetrics.filter((metric) => {
-      const date = new Date(metric.fetchDate);
-      const diffTime = Math.abs(date.getTime() - new Date().getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 2;
-      return diffDays <= TIME_WINDOWS[selectedTimeWindow].days;
-    });
-  }, [eventMetrics, selectedTimeWindow]);
-
-  const trend = React.useMemo(() => {
-    if (data.length < 2 || !data[0] || !data[data.length - 1]) return 0;
-    return (
-      (data?.[data.length - 1]?.minPriceTotal ?? 0) -
-      (data?.[0]?.minPriceTotal ?? 0)
-    );
-  }, [data]);
-
   const { spread, ticks } = React.useMemo(() => {
-    if (data.length < 2) return { spread: 0, ticks: [] };
+    if (eventMetrics.length < 2) return { spread: 0, ticks: [] };
 
-    const { min, max } = data.reduce(
+    const { min, max } = eventMetrics.reduce(
       (acc, d) => ({
         min: Math.min(acc.min, d.minPriceTotal),
         max: Math.max(acc.max, d.minPriceTotal),
       }),
-      { min: data[0]?.minPriceTotal ?? 0, max: data[0]?.minPriceTotal ?? 0 },
+      {
+        min: eventMetrics[0]?.minPriceTotal ?? 0,
+        max: eventMetrics[0]?.minPriceTotal ?? 0,
+      },
     );
 
     const rawSpread = (max - min) * 0.1;
@@ -94,7 +61,7 @@ export function EventChart({
       spread: rawSpread,
       ticks: tickValues,
     };
-  }, [data]);
+  }, [eventMetrics]);
 
   const getDaysUntilEvent = (date: string): string => {
     const eventDate = new Date(date);
@@ -109,36 +76,60 @@ export function EventChart({
   };
 
   return (
-    <div className="px-6 pb-6">
+    <div className={cn("px-6 pb-6", version === "icon" && "p-0")}>
       <ChartContainer
-        config={chartConfig}
-        className="aspect-auto h-[250px] w-full pr-1"
+        config={{
+          minPriceTotal: {
+            label: "Min Price Total",
+          },
+        }}
+        className={cn(
+          "aspect-auto h-[250px] w-full pr-1",
+          version === "icon" && "h-10 w-20 pr-0",
+        )}
       >
-        {isLoading ? (
-          <Skeleton className="h-full w-full" />
-        ) : (
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient
-                id="fillMinPriceTotal"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-primary)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-primary)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
-            <CartesianGrid vertical={false} />
+        <AreaChart data={eventMetrics}>
+          <defs>
+            <linearGradient
+              id="fillMinPriceTotalGood"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="5%"
+                stopColor="var(--color-change-good)"
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="95%"
+                stopColor="var(--color-change-good)"
+                stopOpacity={0.1}
+              />
+            </linearGradient>
+
+            <linearGradient
+              id="fillMinPriceTotalBad"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="5%"
+                stopColor="var(--color-change-bad)"
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="95%"
+                stopColor="var(--color-change-bad)"
+                stopOpacity={0.1}
+              />
+            </linearGradient>
+          </defs>
+          {version === "full" && <CartesianGrid vertical={false} />}
+          {version === "full" && (
             <YAxis
               dataKey="minPriceTotal"
               tickLine={false}
@@ -160,6 +151,8 @@ export function EventChart({
                 return `$${value}`;
               }}
             />
+          )}
+          {version === "full" && (
             <XAxis
               dataKey="fetchDate"
               tickLine={false}
@@ -175,6 +168,8 @@ export function EventChart({
                 });
               }}
             />
+          )}
+          {version === "full" && (
             <ChartTooltip
               cursor={false}
               content={
@@ -208,15 +203,24 @@ export function EventChart({
                 />
               }
             />
-            <Area
-              dataKey="minPriceTotal"
-              type="natural"
-              fill="url(#fillMinPriceTotal)"
-              stroke="var(--color-primary)"
-              animationDuration={800}
-            />
-          </AreaChart>
-        )}
+          )}
+
+          <Area
+            dataKey="minPriceTotal"
+            type="natural"
+            fill={
+              trendDirection === "good"
+                ? "url(#fillMinPriceTotalGood)"
+                : "url(#fillMinPriceTotalBad)"
+            }
+            stroke={
+              trendDirection === "good"
+                ? "var(--color-change-good)"
+                : "var(--color-change-bad)"
+            }
+            animationDuration={800}
+          />
+        </AreaChart>
       </ChartContainer>
     </div>
   );

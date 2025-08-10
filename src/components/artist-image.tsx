@@ -25,6 +25,7 @@ export function ArtistImage({
         alt={artistName}
         width={48}
         height={48}
+        loading="eager"
         className={cn("size-full object-cover", className)}
       />
     </div>

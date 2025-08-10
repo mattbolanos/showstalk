@@ -1,21 +1,12 @@
-import type { RouterOutputs } from "@/trpc/react";
+"use client";
+
+import * as React from "react";
+import { type RouterOutputs, api } from "@/trpc/react";
 
 import { cn } from "@/lib/utils";
-import { MapPinIcon } from "lucide-react";
-import { ArtistImage } from "./artist-image";
+import { EventChart, TIME_WINDOWS } from "./event-chart";
 
 type Event = RouterOutputs["events"]["getTrending"][number];
-
-const formatDate = (date: string) => {
-  return new Date(date)
-    .toLocaleDateString("en-US", {
-      month: "numeric",
-      day: "numeric",
-      weekday: "short",
-      timeZone: "UTC",
-    })
-    .replace(",", "");
-};
 
 export const formatVenue = (
   city: string,
@@ -31,48 +22,98 @@ export const formatVenue = (
   return city;
 };
 
+const formatPercentChange = (percentChange: number) => {
+  return percentChange.toLocaleString("en-US", {
+    style: "percent",
+    signDisplay: "always",
+    maximumFractionDigits: 2,
+  });
+};
+
 export function EventCard({
   event,
   onSelect,
   isSelected,
+  selectedTimeWindow,
+  className,
 }: {
   event: Event;
   onSelect: () => void;
   isSelected: boolean;
+  selectedTimeWindow: keyof typeof TIME_WINDOWS;
+  className?: string;
 }) {
+  const { data: eventMetrics } = api.events.getEventMetrics.useQuery({
+    eventId: event.id,
+  });
+
+  const { data: eventPriceChange } = api.events.getEventPriceChange.useQuery({
+    eventId: event.id,
+    windowDays: TIME_WINDOWS[selectedTimeWindow].days,
+  });
+
+  const data = React.useMemo(() => {
+    if (selectedTimeWindow === "ALL") return eventMetrics;
+
+    return eventMetrics?.filter((metric) => {
+      const date = new Date(metric.fetchDate);
+      const diffTime = Math.abs(date.getTime() - new Date().getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 2;
+      return diffDays <= TIME_WINDOWS[selectedTimeWindow].days;
+    });
+  }, [eventMetrics, selectedTimeWindow]);
+
   return (
     <div
       key={event.id}
       onMouseDown={onSelect}
       className={cn(
-        "flex cursor-pointer justify-between p-2 transition-all duration-100",
-        isSelected && "bg-primary/20",
-        !isSelected && "hover:bg-primary/5",
+        "flex cursor-pointer justify-between border-b p-2 pr-0 transition-all duration-100",
+        isSelected && "bg-accent",
+        !isSelected && "hover:bg-accent/50",
+        className,
       )}
     >
       <div className="flex items-center">
-        <ArtistImage
-          imageUrl={event.artistImage}
-          artistName={event.artistName}
-          containerClassName="mr-3 size-11"
-        />
         <div>
           <h2 className="font-medium">{event.artistName}</h2>
-          <p className="text-muted-foreground flex items-center text-sm">
-            <MapPinIcon className="mr-0.5 size-3" />
+          <p className="text-muted-foreground text-xs">
             {formatVenue(
               event.venueCity,
               event.venueState,
               event.venueExtendedAddress,
             )}{" "}
-            • {formatDate(event.localDatetime)}
+            • {event.venueName}
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+
+      <div className="flex items-center justify-end gap-1">
         <div className="flex flex-col items-end">
-          <h2 className="font-bold">{`$${event.minPriceTotal}`}</h2>
+          <p className="text-sm font-medium">
+            ${eventPriceChange?.currentPrice}
+          </p>
+          <p
+            className={cn(
+              "text-xs font-medium",
+              eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
+                ? "text-change-good"
+                : "text-change-bad",
+            )}
+          >
+            {formatPercentChange(eventPriceChange?.percentChange ?? 0)}
+          </p>
         </div>
+
+        <EventChart
+          eventMetrics={data ?? []}
+          trendDirection={
+            eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
+              ? "good"
+              : "bad"
+          }
+          version="icon"
+        />
       </div>
     </div>
   );

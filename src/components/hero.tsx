@@ -6,8 +6,6 @@ import {
   GuitarIcon,
   MusicIcon,
   SearchIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -66,7 +64,7 @@ export function Hero({
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/30 to-purple-600/30 blur-3xl dark:from-pink-500/20 dark:to-purple-600/20" />
 
             {/* Floating Music Icons */}
-            <div className="pointer-events-none absolute inset-0 z-20">
+            <div className="pointer-events-none absolute inset-0 z-5">
               <div className="animate-drift absolute top-[9%] right-[42%] -rotate-12 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg [animation-delay:0.5s]">
                 <MusicIcon className="size-6 stroke-white stroke-2" />
               </div>
@@ -80,7 +78,7 @@ export function Hero({
 
             {/* Animated Soundwaves */}
             <svg
-              className="absolute top-1/2 left-1/2 z-10 w-full max-w-md -translate-x-1/2 -translate-y-1/2 opacity-90"
+              className="absolute top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 opacity-90"
               viewBox="0 0 400 240"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -176,26 +174,22 @@ export function Hero({
             </svg>
 
             {/* Price Ticker Cards */}
-            {trendingEvents
-              .sort((a, b) => a.weekChange - b.weekChange)
-              .slice(0, 3)
-              .map((event, index) => (
-                <PriceTicker
-                  key={event.artistName}
-                  eventId={event.id}
-                  artist={event.artistName}
-                  price={event.minPriceTotal}
-                  change={event.weekChange}
-                  className={cn(
-                    "animate-float absolute",
-                    index === 0 && "top-2 left-6 -rotate-8 hover:ring-pink-500",
-                    index === 1 &&
-                      "top-22 right-4 rotate-5 [animation-delay:2s] hover:ring-purple-500",
-                    index === 2 &&
-                      "bottom-19 left-12 rotate-4 [animation-delay:4s] hover:ring-indigo-500",
-                  )}
-                />
-              ))}
+            {trendingEvents.slice(0, 3).map((event, index) => (
+              <PriceTicker
+                key={event.artistName}
+                eventId={event.id}
+                artist={event.artistName}
+                price={event.minPriceTotal}
+                className={cn(
+                  "animate-float absolute",
+                  index === 0 && "top-2 left-6 -rotate-8 hover:ring-pink-500",
+                  index === 1 &&
+                    "top-22 right-4 rotate-5 [animation-delay:2s] hover:ring-purple-500",
+                  index === 2 &&
+                    "bottom-19 left-12 rotate-4 [animation-delay:4s] hover:ring-indigo-500",
+                )}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -207,20 +201,16 @@ function PriceTicker({
   artist,
   eventId,
   price,
-  change,
   className,
 }: {
   artist: string;
   eventId: string;
   price: number;
-  change: number;
   className?: string;
 }) {
-  const isUp = change > 0;
-
   return (
     <Card
-      className={`z-20 w-36 gap-0 border-none p-0 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-2 ${className}`}
+      className={`z-6 w-36 gap-0 border-none p-0 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-2 ${className}`}
     >
       <Link
         href={`/event/${eventId}`}
@@ -231,18 +221,6 @@ function PriceTicker({
         <CardContent className="space-y-1 p-3">
           <p className="text-sm font-semibold">{artist}</p>
           <p className="text-xl font-bold">${price}</p>
-          {change !== 0 && (
-            <div
-              className={`flex items-center gap-1 text-xs font-medium ${isUp ? "text-red-600" : "text-emerald-500"}`}
-            >
-              {isUp ? (
-                <TrendingUpIcon className="size-3" />
-              ) : (
-                <TrendingDownIcon className="size-3" />
-              )}
-              ${Math.abs(change)} this week
-            </div>
-          )}
         </CardContent>
       </Link>
     </Card>
