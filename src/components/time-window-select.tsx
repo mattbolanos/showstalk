@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState, useRef, useEffect } from "react";
 
 import { TIME_WINDOWS, useTimeWindow } from "@/stores/use-time-window";
+import { cn } from "@/lib/utils";
 
 const timeWindowOptions = Object.keys(TIME_WINDOWS).map((key) => key);
 
@@ -75,18 +76,19 @@ export function TimeWindowSelect() {
             />
 
             {/* Tabs */}
-            <div className="relative flex items-center space-x-[6px]">
+            <div className="relative flex items-center space-x-3">
               {timeWindowOptions.map((option, index) => (
                 <div
                   key={option}
                   ref={(el) => {
                     tabRefs.current[index] = el;
                   }}
-                  className={`h-[30px] cursor-pointer px-3 py-2 transition-colors duration-300 ${
+                  className={cn(
+                    "h-[30px] cursor-pointer px-3 py-2 transition-colors duration-300",
                     index === activeIndex
                       ? "text-foreground"
-                      : "text-muted-foreground"
-                  }`}
+                      : "text-muted-foreground",
+                  )}
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   onClick={() =>

@@ -173,7 +173,6 @@ export function EventChart({
           )}
           {version === "full" && (
             <ChartTooltip
-              cursor={false}
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {

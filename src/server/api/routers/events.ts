@@ -148,8 +148,6 @@ export const eventsRouter = createTRPCRouter({
 
       if (!latestDate) return null;
 
-      console.log(latestDate);
-
       const comparisonDate =
         input.windowDays === -1
           ? latestDate.minDate
