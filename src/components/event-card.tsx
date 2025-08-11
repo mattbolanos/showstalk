@@ -4,6 +4,7 @@ import * as React from "react";
 import { type RouterOutputs, api } from "@/trpc/react";
 
 import { cn } from "@/lib/utils";
+import { ChangeText } from "./change-text";
 import { EventChart, TIME_WINDOWS } from "./event-chart";
 
 type Event = RouterOutputs["events"]["getTrending"][number];
@@ -20,15 +21,6 @@ export const formatVenue = (
     return `${city}, ${extendedAddress}`;
   }
   return city;
-};
-
-const formatPercentChange = (percentChange: number) => {
-  return percentChange.toLocaleString("en-US", {
-    style: "percent",
-    signDisplay: "always",
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-  });
 };
 
 export function EventCard({
@@ -85,13 +77,15 @@ export function EventCard({
           </p>
           <p
             className={cn(
-              "text-xs font-medium tabular-nums",
               eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
                 ? "text-change-good"
                 : "text-change-bad",
             )}
           >
-            {formatPercentChange(eventPriceChange?.percentChange ?? 0)}
+            <ChangeText
+              value={eventPriceChange?.percentChange}
+              className="text-xs"
+            />
           </p>
         </div>
 
