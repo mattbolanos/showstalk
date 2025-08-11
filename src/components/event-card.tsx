@@ -85,7 +85,7 @@ export function EventCard({
           </p>
           <p
             className={cn(
-              "text-xs font-medium",
+              "text-xs font-medium tabular-nums",
               eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
                 ? "text-change-good"
                 : "text-change-bad",
