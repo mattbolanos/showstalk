@@ -74,155 +74,144 @@ export function EventChart({
   }, [data]);
 
   return (
-    <div className={cn("px-2 pr-0 pb-6", version === "icon" && "p-0")}>
-      <ChartContainer
-        config={{
-          minPriceTotal: {
-            label: "Min Price Total",
-          },
-        }}
-        className={cn(
-          "aspect-auto h-[250px] w-full pr-1",
-          version === "icon" && "-my-2 h-12 w-25 pr-0",
-        )}
-      >
-        <AreaChart data={data}>
-          <defs>
-            <linearGradient
-              id="fillMinPriceTotalGood"
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-              <stop
-                offset="5%"
-                stopColor="var(--color-change-good)"
-                stopOpacity={0.8}
-              />
-              <stop
-                offset="95%"
-                stopColor="var(--color-change-good)"
-                stopOpacity={0.1}
-              />
-            </linearGradient>
-
-            <linearGradient
-              id="fillMinPriceTotalBad"
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-              <stop
-                offset="5%"
-                stopColor="var(--color-change-bad)"
-                stopOpacity={0.8}
-              />
-              <stop
-                offset="95%"
-                stopColor="var(--color-change-bad)"
-                stopOpacity={0.1}
-              />
-            </linearGradient>
-          </defs>
-          <CartesianGrid
-            vertical={false}
-            className={cn(version === "icon" && "hidden")}
-          />
-
-          {version === "full" && (
-            <YAxis
-              dataKey="minPriceTotal"
-              tickLine={false}
-              allowDecimals={false}
-              interval={"preserveStartEnd"}
-              type="number"
-              orientation="right"
-              axisLine={false}
-              min={0}
-              ticks={ticks}
-              domain={[
-                (dataMin: number) => dataMin - spread,
-                (dataMax: number) => dataMax + spread,
-              ]}
-              tick={{ fontWeight: 500 }}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                return `$${value}`;
-              }}
+    <ChartContainer
+      config={{
+        minPriceTotal: {
+          label: "Min Price Total",
+        },
+      }}
+      className={cn(
+        "aspect-auto h-62 w-full pr-1",
+        version === "icon" && "-my-2 h-12 w-23 pr-0",
+      )}
+    >
+      <AreaChart data={data}>
+        <defs>
+          <linearGradient
+            id="fillMinPriceTotalGood"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop
+              offset="5%"
+              stopColor="var(--color-change-good)"
+              stopOpacity={0.8}
             />
-          )}
-          {version === "full" && (
-            <XAxis
-              dataKey="fetchDate"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={48}
-              interval={"preserveStart"}
-              tickFormatter={(value) => {
-                return new Date(value as string).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  timeZone: "UTC",
-                });
-              }}
+            <stop
+              offset="95%"
+              stopColor="var(--color-change-good)"
+              stopOpacity={0.1}
             />
-          )}
-          {version === "full" && (
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value as string).toLocaleDateString(
-                      "en-US",
-                      {
-                        month: "short",
-                        day: "numeric",
-                        timeZone: "UTC",
-                      },
-                    );
-                  }}
-                  indicator="dot"
-                  formatter={(value) => {
-                    return (
-                      <>
-                        Starting At:{" "}
-                        <span className="font-medium">
-                          {value.toLocaleString("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                            maximumFractionDigits: 0,
-                            useGrouping: true,
-                          })}
-                        </span>
-                      </>
-                    );
-                  }}
-                />
-              }
-            />
-          )}
+          </linearGradient>
 
-          <Area
+          <linearGradient id="fillMinPriceTotalBad" x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="5%"
+              stopColor="var(--color-change-bad)"
+              stopOpacity={0.8}
+            />
+            <stop
+              offset="95%"
+              stopColor="var(--color-change-bad)"
+              stopOpacity={0.1}
+            />
+          </linearGradient>
+        </defs>
+        <CartesianGrid
+          vertical={false}
+          className={cn(version === "icon" && "hidden")}
+        />
+
+        {version === "full" && (
+          <YAxis
             dataKey="minPriceTotal"
-            type="natural"
-            fill={
-              trendDirection === "good"
-                ? "url(#fillMinPriceTotalGood)"
-                : "url(#fillMinPriceTotalBad)"
-            }
-            stroke={
-              trendDirection === "good"
-                ? "var(--color-change-good)"
-                : "var(--color-change-bad)"
-            }
-            animationDuration={800}
+            tickLine={false}
+            allowDecimals={false}
+            interval={"preserveStartEnd"}
+            type="number"
+            orientation="right"
+            axisLine={false}
+            min={0}
+            ticks={ticks}
+            domain={[
+              (dataMin: number) => dataMin - spread,
+              (dataMax: number) => dataMax + spread,
+            ]}
+            tick={{ fontWeight: 500 }}
+            tickMargin={8}
+            minTickGap={32}
+            tickFormatter={(value) => {
+              return `$${value}`;
+            }}
           />
-        </AreaChart>
-      </ChartContainer>
-    </div>
+        )}
+        {version === "full" && (
+          <XAxis
+            dataKey="fetchDate"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            minTickGap={48}
+            interval={"preserveStart"}
+            tickFormatter={(value) => {
+              return new Date(value as string).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                timeZone: "UTC",
+              });
+            }}
+          />
+        )}
+        {version === "full" && (
+          <ChartTooltip
+            content={
+              <ChartTooltipContent
+                labelFormatter={(value) => {
+                  return new Date(value as string).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "UTC",
+                  });
+                }}
+                indicator="dot"
+                formatter={(value) => {
+                  return (
+                    <>
+                      Starting At:{" "}
+                      <span className="font-medium">
+                        {value.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                          maximumFractionDigits: 0,
+                          useGrouping: true,
+                        })}
+                      </span>
+                    </>
+                  );
+                }}
+              />
+            }
+          />
+        )}
+
+        <Area
+          dataKey="minPriceTotal"
+          type="natural"
+          fill={
+            trendDirection === "good"
+              ? "url(#fillMinPriceTotalGood)"
+              : "url(#fillMinPriceTotalBad)"
+          }
+          stroke={
+            trendDirection === "good"
+              ? "var(--color-change-good)"
+              : "var(--color-change-bad)"
+          }
+          animationDuration={800}
+        />
+      </AreaChart>
+    </ChartContainer>
   );
 }

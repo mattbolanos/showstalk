@@ -6,6 +6,7 @@ import { type RouterOutputs, api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 import { ChangeText } from "./change-text";
 import { EventChart, TIME_WINDOWS } from "./event-chart";
+import { Skeleton } from "./ui/skeleton";
 
 type Event = RouterOutputs["events"]["getTrending"][number];
 
@@ -50,54 +51,52 @@ export function EventCard({
       key={event.id}
       onMouseDown={onSelect}
       className={cn(
-        "flex cursor-pointer justify-between border-b p-2 pr-0 transition-all duration-100",
+        "cursor-default border-b p-2 pr-0 transition-all duration-100",
         isSelected && "bg-accent",
         !isSelected && "hover:bg-accent/50",
         className,
       )}
     >
-      <div className="flex items-center">
-        <div>
-          <h2 className="font-medium">{event.artistName}</h2>
-          <p className="text-muted-foreground text-xs">
-            {formatVenue(
-              event.venueCity ?? "",
-              event.venueState ?? "",
-              event.venueExtendedAddress ?? "",
-            )}{" "}
-            • {event.venueName}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-end gap-1">
-        <div className="flex flex-col items-end">
-          <p className="text-sm font-medium">
-            ${eventPriceChange?.currentPrice}
-          </p>
-          <p
-            className={cn(
-              eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
-                ? "text-change-good"
-                : "text-change-bad",
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate font-medium">{event.artistName}</p>
+            <p className="text-sm font-medium tabular-nums">
+              ${eventPriceChange?.currentPrice}
+            </p>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-muted-foreground truncate text-xs">
+              {formatVenue(
+                event.venueCity ?? "",
+                event.venueState ?? "",
+                event.venueExtendedAddress ?? "",
+              )}{" "}
+              • {event.venueName}
+            </p>
+            {eventPriceChange ? (
+              <ChangeText
+                value={eventPriceChange?.percentChange}
+                className="text-xs"
+              />
+            ) : (
+              <Skeleton className="h-6 w-10" />
             )}
-          >
-            <ChangeText
-              value={eventPriceChange?.percentChange}
-              className="text-xs"
-            />
-          </p>
+          </div>
         </div>
-
-        <EventChart
-          eventMetrics={eventMetrics ?? []}
-          trendDirection={
-            eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
-              ? "good"
-              : "bad"
-          }
-          version="icon"
-        />
+        {eventMetrics ? (
+          <EventChart
+            eventMetrics={eventMetrics}
+            trendDirection={
+              eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
+                ? "good"
+                : "bad"
+            }
+            version="icon"
+          />
+        ) : (
+          <Skeleton className="h-10 w-23 rounded-xs" />
+        )}
       </div>
     </div>
   );

@@ -31,18 +31,6 @@ const formatDate = (date: string) => {
   });
 };
 
-const getDaysUntilEvent = (date: string): string => {
-  const eventDate = new Date(date);
-  const today = new Date();
-  const diffTime = Math.abs(eventDate.getTime() - today.getTime());
-  const daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
-  return daysAway === 1
-    ? "tomorrow"
-    : daysAway === 0
-      ? "today"
-      : `${daysAway} days away`;
-};
-
 export function FeaturedEvents({
   trendingEventsPromise,
 }: {
@@ -103,7 +91,7 @@ export function FeaturedEvents({
         <TimeWindowSelect className="col-span-2 w-full justify-start" />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="space-y-4 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
         <Card className="col-span-1 gap-0 overflow-hidden px-0 pt-4 pb-0 sm:px-0">
           <CardHeader className="px-2">
             <CardTitle className="text-primary flex items-center gap-2">
@@ -122,11 +110,11 @@ export function FeaturedEvents({
             />
           ))}
         </Card>
-        <Card className="col-span-2">
+        <Card className="col-span-2 gap-4 pr-0 pb-0">
           <CardHeader className="gap-0">
             <CardTitle className="flex items-center justify-between">
               <span>{eventMeta?.name}</span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <NumberFlow
                   value={eventPriceChange?.currentPrice ?? 0}
                   format={{
@@ -135,6 +123,7 @@ export function FeaturedEvents({
                     maximumFractionDigits: 0,
                     minimumFractionDigits: 0,
                   }}
+                  className="font-medium tabular-nums"
                 />
                 <ChangeText
                   value={eventPriceChange?.percentChange}
@@ -152,12 +141,12 @@ export function FeaturedEvents({
                 • {eventMeta?.venueName} •{" "}
                 {formatDate(eventMeta?.localDatetime ?? "")}
               </span>
-              <span className="text-primary font-bold uppercase">
-                {getDaysUntilEvent(eventMeta?.localDatetime ?? "")}
+              <span className="text-muted-foreground text-xs font-medium">
+                {TIME_WINDOWS[timeWindow].description}
               </span>
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pr-0">
             <EventChart
               eventMetrics={eventMetrics ?? []}
               trendDirection={
