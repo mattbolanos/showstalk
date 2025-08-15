@@ -17,8 +17,10 @@ import { TimeWindowSelect } from "./time-window-select";
 import { useTimeWindow } from "@/stores/use-time-window";
 import { Button } from "./ui/button";
 import { useSearch } from "@/stores/use-search";
-import NumberFlow from "@number-flow/react";
+import NumberFlow, { NumberFlowGroup } from "@number-flow/react";
+
 import { ChangeText } from "./change-text";
+import { Skeleton } from "./ui/skeleton";
 
 type TrendingEvents = RouterOutputs["events"]["getTrending"];
 
@@ -113,34 +115,48 @@ export function FeaturedEvents({
         <Card className="col-span-2 gap-4 pr-0 pb-0">
           <CardHeader className="gap-0">
             <CardTitle className="flex items-center justify-between">
-              <span>{eventMeta?.name}</span>
-              <span className="flex items-center gap-1.5">
-                <NumberFlow
-                  value={eventPriceChange?.currentPrice ?? 0}
-                  format={{
-                    style: "currency",
-                    currency: "USD",
-                    maximumFractionDigits: 0,
-                    minimumFractionDigits: 0,
-                  }}
-                  className="font-medium tabular-nums"
-                />
-                <ChangeText
-                  value={eventPriceChange?.percentChange}
-                  className="text-sm font-medium"
-                />
-              </span>
+              {eventMeta ? (
+                <span>{eventMeta.name}</span>
+              ) : (
+                <Skeleton className="h-5 w-40" />
+              )}
+              {eventPriceChange ? (
+                <NumberFlowGroup>
+                  <span className="flex items-center gap-1.5">
+                    <NumberFlow
+                      value={eventPriceChange.currentPrice ?? 0}
+                      format={{
+                        style: "currency",
+                        currency: "USD",
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0,
+                      }}
+                      className="font-medium tabular-nums"
+                    />
+                    <ChangeText
+                      value={eventPriceChange.percentChange}
+                      className="text-sm font-medium"
+                    />
+                  </span>
+                </NumberFlowGroup>
+              ) : (
+                <Skeleton className="h-6 w-20" />
+              )}
             </CardTitle>
             <CardDescription className="flex items-center justify-between">
-              <span>
-                {formatVenue(
-                  eventMeta?.venueCity ?? "",
-                  eventMeta?.venueState ?? "",
-                  eventMeta?.venueStreetAddress ?? "",
-                )}{" "}
-                • {eventMeta?.venueName} •{" "}
-                {formatDate(eventMeta?.localDatetime ?? "")}
-              </span>
+              {eventMeta ? (
+                <span>
+                  {formatVenue(
+                    eventMeta.venueCity ?? "",
+                    eventMeta.venueState ?? "",
+                    eventMeta.venueStreetAddress ?? "",
+                  )}{" "}
+                  • {eventMeta.venueName} •{" "}
+                  {formatDate(eventMeta.localDatetime ?? "")}
+                </span>
+              ) : (
+                <Skeleton className="h-5 w-20" />
+              )}
               <span className="text-muted-foreground text-xs font-medium">
                 {TIME_WINDOWS[timeWindow].description}
               </span>

@@ -51,13 +51,13 @@ export function EventCard({
       key={event.id}
       onMouseDown={onSelect}
       className={cn(
-        "cursor-default border-b p-2 pr-0 transition-all duration-100",
-        isSelected && "bg-accent",
+        "cursor-default border-b p-2 transition-all duration-100",
+        isSelected && "bg-accent/80",
         !isSelected && "hover:bg-accent/50",
         className,
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <p className="truncate font-medium">{event.artistName}</p>
@@ -80,7 +80,7 @@ export function EventCard({
                 className="text-xs"
               />
             ) : (
-              <Skeleton className="h-6 w-10" />
+              <Skeleton className="h-[18px] w-10" />
             )}
           </div>
         </div>
@@ -95,7 +95,7 @@ export function EventCard({
             version="icon"
           />
         ) : (
-          <Skeleton className="h-10 w-23 rounded-xs" />
+          <Skeleton className="bg-primary/10 h-10 w-23 rounded-xs" />
         )}
       </div>
     </div>
