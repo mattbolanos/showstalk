@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useState, useRef, useEffect } from "react";
 
 import { TIME_WINDOWS, useTimeWindow } from "@/stores/use-time-window";
@@ -8,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const timeWindowOptions = Object.keys(TIME_WINDOWS).map((key) => key);
 
-export function TimeWindowSelect() {
+export function TimeWindowSelect({ className }: { className?: string }) {
   const { timeWindow, setTimeWindow } = useTimeWindow();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [hoverStyle, setHoverStyle] = useState({});
@@ -56,54 +55,52 @@ export function TimeWindowSelect() {
   }, []);
 
   return (
-    <div className="flex w-full items-center justify-center">
-      <Card className="relative flex w-full items-center justify-center border-none shadow-none">
-        <CardContent className="p-0">
-          <div className="relative">
-            {/* Hover Highlight */}
-            <div
-              className="bg-accent absolute flex h-[30px] items-center rounded-[6px] transition-all duration-300 ease-out"
-              style={{
-                ...hoverStyle,
-                opacity: hoveredIndex !== null ? 1 : 0,
-              }}
-            />
+    <div className={cn("flex items-center", className)}>
+      <div className="relative flex w-full items-center justify-start">
+        <div className="relative">
+          {/* Hover Highlight */}
+          <div
+            className="bg-accent absolute flex h-9 items-center rounded-[6px] transition-all duration-300 ease-out"
+            style={{
+              ...hoverStyle,
+              opacity: hoveredIndex !== null ? 1 : 0,
+            }}
+          />
 
-            {/* Active Indicator */}
-            <div
-              className="bg-accent absolute h-[30px] rounded-[6px] transition-all duration-300 ease-out"
-              style={activeStyle}
-            />
+          {/* Active Indicator */}
+          <div
+            className="bg-accent absolute h-9 rounded-[6px] transition-all duration-300 ease-out"
+            style={activeStyle}
+          />
 
-            {/* Tabs */}
-            <div className="relative flex items-center space-x-3">
-              {timeWindowOptions.map((option, index) => (
-                <div
-                  key={option}
-                  ref={(el) => {
-                    tabRefs.current[index] = el;
-                  }}
-                  className={cn(
-                    "h-[30px] cursor-pointer px-3 py-2 transition-colors duration-300",
-                    index === activeIndex
-                      ? "text-foreground"
-                      : "text-muted-foreground",
-                  )}
-                  onMouseEnter={() => setHoveredIndex(index)}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                  onClick={() =>
-                    setTimeWindow(option as keyof typeof TIME_WINDOWS)
-                  }
-                >
-                  <div className="flex h-full items-center justify-center text-sm leading-5 font-medium whitespace-nowrap">
-                    {option}
-                  </div>
+          {/* Tabs */}
+          <div className="relative flex items-center space-x-3">
+            {timeWindowOptions.map((option, index) => (
+              <div
+                key={option}
+                ref={(el) => {
+                  tabRefs.current[index] = el;
+                }}
+                className={cn(
+                  "h-9 cursor-pointer px-3 py-2 transition-colors duration-300",
+                  index === activeIndex
+                    ? "text-foreground"
+                    : "text-muted-foreground",
+                )}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                onClick={() =>
+                  setTimeWindow(option as keyof typeof TIME_WINDOWS)
+                }
+              >
+                <div className="flex h-full items-center justify-center text-sm leading-5 font-medium whitespace-nowrap">
+                  {option}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

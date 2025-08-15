@@ -61,9 +61,9 @@ export function EventCard({
           <h2 className="font-medium">{event.artistName}</h2>
           <p className="text-muted-foreground text-xs">
             {formatVenue(
-              event.venueCity,
-              event.venueState,
-              event.venueExtendedAddress,
+              event.venueCity ?? "",
+              event.venueState ?? "",
+              event.venueExtendedAddress ?? "",
             )}{" "}
             • {event.venueName}
           </p>

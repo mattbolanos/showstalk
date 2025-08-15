@@ -1,95 +1,68 @@
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import {
+  type createTRPCContext,
+  createTRPCRouter,
+  publicProcedure,
+} from "@/server/api/trpc";
 import {
   eventMeta,
   eventArtists,
   eventMetrics,
   artists,
 } from "@/server/db/schema";
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  gt,
-  gte,
-  ilike,
-  isNotNull,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, ilike, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
 
-const rowNumber =
-  sql<number>`ROW_NUMBER() OVER (PARTITION BY ${eventMetrics.eventId})`.as(
-    "row_num",
-  );
+type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+
+const getTrending = async (ctx: Context) => {
+  const rankedEvents = ctx.db
+    .select({
+      eventId: eventMetrics.eventId,
+      popularityScore: eventMetrics.popularityScore,
+      artistId: eventArtists.artistId,
+      minPriceTotal: eventMetrics.minPriceTotal,
+      artistRank: sql<number>`ROW_NUMBER() OVER (
+        PARTITION BY ${eventArtists.artistId}
+        ORDER BY ${eventMetrics.popularityScore} DESC
+      )`.as("artist_rank"),
+      eventRank: sql<number>`ROW_NUMBER() OVER (
+        PARTITION BY ${eventMetrics.eventId}
+        ORDER BY ${eventMetrics.popularityScore} DESC
+      )`.as("event_rank"),
+    })
+    .from(eventMetrics)
+    .leftJoin(eventArtists, eq(eventArtists.eventId, eventMetrics.eventId))
+    .where(eq(eventMetrics.fetchDate, latestFetchDateSubquery))
+    .as("ranked_events");
+
+  return await ctx.db
+    .select({
+      id: rankedEvents.eventId,
+      name: eventMeta.name,
+      artistId: rankedEvents.artistId,
+      artistName: artists.name,
+      artistImage: artists.image,
+      venueCity: eventMeta.venueCity,
+      venueName: eventMeta.venueName,
+      venueState: eventMeta.venueState,
+      venueExtendedAddress: eventMeta.venueExtendedAddress,
+      localDatetime: eventMeta.localDatetime,
+      minPriceTotal: rankedEvents.minPriceTotal,
+      updatedAt: eventMeta.updatedAt,
+    })
+    .from(rankedEvents)
+    .leftJoin(eventMeta, eq(eventMeta.id, rankedEvents.eventId))
+    .leftJoin(artists, eq(artists.id, rankedEvents.artistId))
+    .where(and(eq(rankedEvents.artistRank, 1), eq(rankedEvents.eventRank, 1)))
+    .orderBy(desc(rankedEvents.popularityScore))
+    .limit(6);
+};
 
 export const eventsRouter = createTRPCRouter({
   getTrending: publicProcedure.query(async ({ ctx }) => {
-    const topArtistsSubquery = ctx.db
-      .select({
-        id: artists.id,
-        name: artists.name,
-        image: artists.image,
-        maxPop: sql<number>`MAX(${eventMetrics.popularityScore})`.as("max_pop"),
-      })
-      .from(eventArtists)
-      .innerJoin(eventMetrics, eq(eventMetrics.eventId, eventArtists.eventId))
-      .innerJoin(artists, eq(eventArtists.artistId, artists.id))
-      .where(
-        and(
-          isNotNull(eventMetrics.popularityScore),
-          sql`${eventMetrics.fetchDate} = ${latestFetchDateSubquery}`,
-        ),
-      )
-      .groupBy(artists.id, artists.name, artists.image)
-      .orderBy(desc(sql`MAX(${eventMetrics.popularityScore})`))
-      .limit(20)
-      .as("top_artists");
-
-    // Main query combining both CTEs
-    const shows = ctx.db
-      .with(topArtistsSubquery)
-      .select({
-        id: eventMetrics.eventId,
-        name: sql<string>`${eventMeta.name}`.as("name"),
-        artistName: sql<string>`${topArtistsSubquery.name}`.as("artist_name"),
-        artistImage: sql<string>`${topArtistsSubquery.image}`.as(
-          "artist_image",
-        ),
-        venueCity: sql<string>`${eventMeta.venueCity}`.as("venue_city"),
-        venueState: sql<string>`${eventMeta.venueState}`.as("venue_state"),
-        venueExtendedAddress: sql<string>`${eventMeta.venueExtendedAddress}`.as(
-          "venue_extended_address",
-        ),
-        venueName: sql<string>`${eventMeta.venueName}`.as("venue_name"),
-        localDatetime: sql<string>`${eventMeta.localDatetime}`.as(
-          "local_datetime",
-        ),
-        minPricePrefee: sql<number>`${eventMetrics.minPricePrefee}`.as(
-          "min_price_prefee",
-        ),
-        minPriceTotal: sql<number>`${eventMetrics.minPriceTotal}`.as(
-          "min_price_total",
-        ),
-
-        updatedAt: sql<string>`${eventMeta.updatedAt}`.as("updated_at"),
-        rowNum: rowNumber,
-      })
-      .from(eventMetrics)
-      .innerJoin(eventArtists, eq(eventArtists.eventId, eventMetrics.eventId))
-      .innerJoin(
-        topArtistsSubquery,
-        sql`${topArtistsSubquery.id} = ${eventArtists.artistId} AND ${topArtistsSubquery.maxPop} = ${eventMetrics.popularityScore}`,
-      )
-      .innerJoin(eventMeta, eq(eventMeta.id, eventMetrics.eventId))
-      .where(sql`${eventMetrics.fetchDate} = ${latestFetchDateSubquery}`)
-      .orderBy(desc(topArtistsSubquery.maxPop))
-      .as("shows");
-
-    return ctx.db.select().from(shows).where(eq(rowNumber, 1)).limit(8);
+    return getTrending(ctx);
   }),
 
   getEventMetrics: publicProcedure
