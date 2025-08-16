@@ -9,12 +9,13 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { type RouterOutputs } from "@/trpc/react";
+import { api, type RouterOutputs } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 
 import Link from "next/link";
 import { useSearch } from "@/stores/use-search";
 import { Button } from "./ui/button";
+import { ChangeText } from "./change-text";
 
 export function Hero({
   trendingEventsPromise,
@@ -23,6 +24,13 @@ export function Hero({
 }) {
   const trendingEvents = React.use(trendingEventsPromise);
   const setSearchOpen = useSearch((state) => state.setSearchOpen);
+
+  trendingEvents.map((event) => {
+    api.events.getEventPriceChange.usePrefetchQuery({
+      eventId: event.id,
+      windowDays: 14,
+    });
+  });
 
   const handleGetStarted = () => {
     setSearchOpen(true);
@@ -178,7 +186,7 @@ export function Hero({
               <PriceTicker
                 key={event.artistName}
                 eventId={event.id}
-                artist={event.artistName}
+                artist={event.artistName!}
                 price={event.minPriceTotal}
                 className={cn(
                   "animate-float absolute",
@@ -208,6 +216,11 @@ function PriceTicker({
   price: number;
   className?: string;
 }) {
+  const { data: eventPriceChange } = api.events.getEventPriceChange.useQuery({
+    eventId,
+    windowDays: 14,
+  });
+
   return (
     <Card
       className={`z-6 w-36 gap-0 border-none p-0 shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-2 ${className}`}
@@ -221,6 +234,10 @@ function PriceTicker({
         <CardContent className="space-y-1 p-3">
           <p className="text-sm font-semibold">{artist}</p>
           <p className="text-xl font-bold">${price}</p>
+          <ChangeText
+            value={eventPriceChange?.percentChange}
+            className="text-sm"
+          />
         </CardContent>
       </Link>
     </Card>
