@@ -9,7 +9,18 @@ import {
   eventMetrics,
   artists,
 } from "@/server/db/schema";
-import { and, asc, desc, eq, gt, gte, ilike, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  ilike,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
@@ -133,27 +144,15 @@ export const eventsRouter = createTRPCRouter({
           .limit(1)
           .as("comparison_date");
       } else {
-        const dateBounds = await ctx.db
+        const dataCount = await ctx.db
           .select({
-            minDate: sql<Date>`MIN(${eventMetrics.fetchDate})`.as("min_date"),
-            maxDate: sql<Date>`MAX(${eventMetrics.fetchDate})`.as("max_date"),
+            count: count(),
           })
           .from(eventMetrics)
           .where(eq(eventMetrics.eventId, input.eventId))
-          .then((rows) => rows[0]);
+          .then((rows) => rows[0]?.count);
 
-        if (!dateBounds) return null;
-        const comparisonDate = (() => {
-          const targetDate = new Date(dateBounds.maxDate);
-          targetDate.setDate(targetDate.getDate() - input.windowDays);
-
-          // if target date is before min date, use min date
-          if (targetDate < new Date(dateBounds.minDate)) {
-            return dateBounds.minDate;
-          }
-
-          return targetDate.toISOString().split("T")[0];
-        })();
+        if (!dataCount) return null;
 
         comparisonPriceQuery = ctx.db
           .select({
@@ -163,12 +162,9 @@ export const eventsRouter = createTRPCRouter({
               ),
           })
           .from(eventMetrics)
-          .where(
-            and(
-              eq(eventMetrics.eventId, input.eventId),
-              sql`${eventMetrics.fetchDate} = ${comparisonDate}`,
-            ),
-          )
+          .where(eq(eventMetrics.eventId, input.eventId))
+          .orderBy(desc(eventMetrics.fetchDate))
+          .offset(Math.min(input.windowDays, dataCount))
           .limit(1)
           .as("comparison_date");
       }
