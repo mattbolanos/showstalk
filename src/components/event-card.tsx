@@ -61,9 +61,13 @@ export function EventCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <p className="truncate font-medium">{event.artistName}</p>
-            <p className="text-sm font-medium tabular-nums">
-              ${eventPriceChange?.currentPrice}
-            </p>
+            {eventPriceChange ? (
+              <p className="text-sm font-medium tabular-nums">
+                {`$${eventPriceChange.currentPrice}`}
+              </p>
+            ) : (
+              <Skeleton className="h-5 w-10" />
+            )}
           </div>
           <div className="flex items-center justify-between gap-2">
             <p className="text-muted-foreground truncate text-xs">
