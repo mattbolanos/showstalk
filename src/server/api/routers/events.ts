@@ -118,26 +118,18 @@ export const eventsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const metrics = await ctx.db
         .select({
-          fetchDate: sql<Date>`${eventMetrics.fetchDate}`.as("fetch_date"),
-          minPriceTotal:
-            sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
-              "min_price_total",
-            ),
+          minPriceTotal: eventMetrics.minPriceTotal,
         })
         .from(eventMetrics)
-        .where(
-          and(
-            eq(eventMetrics.eventId, input.eventId),
-            gt(eventMetrics.minPriceTotal, 0),
-          ),
-        )
+        .where(eq(eventMetrics.eventId, input.eventId))
         .orderBy(desc(eventMetrics.fetchDate))
-        .limit(input.windowDays == -1 ? 730 : input.windowDays + 1);
+        .limit(input.windowDays == -1 ? 730 : input.windowDays + 1)
+        .then((rows) => rows.map((row) => row.minPriceTotal));
 
       if (!metrics?.length) return null;
 
-      const currentPrice = metrics.at(0)?.minPriceTotal;
-      const historicalPrice = metrics.at(-1)?.minPriceTotal;
+      const currentPrice = metrics.at(0);
+      const historicalPrice = metrics.at(-1);
 
       if (!historicalPrice)
         return {
