@@ -55,7 +55,13 @@ const getTrending = async (ctx: Context) => {
     .from(rankedEvents)
     .leftJoin(eventMeta, eq(eventMeta.id, rankedEvents.eventId))
     .leftJoin(artists, eq(artists.id, rankedEvents.artistId))
-    .where(and(eq(rankedEvents.artistRank, 1), eq(rankedEvents.eventRank, 1)))
+    .where(
+      and(
+        eq(rankedEvents.artistRank, 1),
+        eq(rankedEvents.eventRank, 1),
+        gte(eventMeta.utcDatetime, new Date().toISOString()),
+      ),
+    )
     .orderBy(desc(rankedEvents.popularityScore))
     .limit(6);
 };

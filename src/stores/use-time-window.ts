@@ -14,6 +14,6 @@ interface TimeWindowStore {
 }
 
 export const useTimeWindow = create<TimeWindowStore>((set) => ({
-  timeWindow: "1M",
+  timeWindow: "2W",
   setTimeWindow: (timeWindow) => set({ timeWindow }),
 }));
