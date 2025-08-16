@@ -116,46 +116,62 @@ export const eventsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const latestDate = await ctx.db
-        .select({
-          latest: sql<string>`MAX(${eventMetrics.fetchDate})`.as("latest"),
-          minDate: sql<string>`MIN(${eventMetrics.fetchDate})`.as("min_date"),
-        })
-        .from(eventMetrics)
-        .where(eq(eventMetrics.eventId, input.eventId))
-        .then((rows) => rows[0]);
+      let comparisonPriceQuery;
 
-      if (!latestDate) return null;
+      if (input.windowDays === -1) {
+        // take the first price
+        comparisonPriceQuery = ctx.db
+          .select({
+            minPriceTotal:
+              sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
+                "min_price_total",
+              ),
+          })
+          .from(eventMetrics)
+          .where(eq(eventMetrics.eventId, input.eventId))
+          .orderBy(asc(eventMetrics.fetchDate))
+          .limit(1)
+          .as("comparison_date");
+      } else {
+        const dateBounds = await ctx.db
+          .select({
+            minDate: sql<Date>`MIN(${eventMetrics.fetchDate})`.as("min_date"),
+            maxDate: sql<Date>`MAX(${eventMetrics.fetchDate})`.as("max_date"),
+          })
+          .from(eventMetrics)
+          .where(eq(eventMetrics.eventId, input.eventId))
+          .then((rows) => rows[0]);
 
-      const comparisonDate =
-        input.windowDays === -1
-          ? latestDate.minDate
-          : (() => {
-              const targetDate = new Date(latestDate.latest);
-              targetDate.setDate(targetDate.getDate() - input.windowDays);
-              const targetDateStr = targetDate.toISOString().split("T")[0];
+        if (!dateBounds) return null;
+        const comparisonDate = (() => {
+          const targetDate = new Date(dateBounds.maxDate);
+          targetDate.setDate(targetDate.getDate() - input.windowDays);
 
-              // If target date is before minDate, use minDate instead
-              return targetDate < new Date(latestDate.minDate)
-                ? latestDate.minDate
-                : targetDateStr;
-            })();
+          // if target date is before min date, use min date
+          if (targetDate < new Date(dateBounds.minDate)) {
+            return dateBounds.minDate;
+          }
 
-      const comparisonPriceQuery = ctx.db
-        .select({
-          minPriceTotal:
-            sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
-              "min_price_total",
+          return targetDate.toISOString().split("T")[0];
+        })();
+
+        comparisonPriceQuery = ctx.db
+          .select({
+            minPriceTotal:
+              sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
+                "min_price_total",
+              ),
+          })
+          .from(eventMetrics)
+          .where(
+            and(
+              eq(eventMetrics.eventId, input.eventId),
+              sql`${eventMetrics.fetchDate} = ${comparisonDate}`,
             ),
-        })
-        .from(eventMetrics)
-        .where(
-          and(
-            eq(eventMetrics.eventId, input.eventId),
-            sql`${eventMetrics.fetchDate} = ${comparisonDate}`,
-          ),
-        )
-        .as("comparison_date");
+          )
+          .limit(1)
+          .as("comparison_date");
+      }
 
       const latestPriceQuery = ctx.db
         .select({
@@ -165,12 +181,9 @@ export const eventsRouter = createTRPCRouter({
             ),
         })
         .from(eventMetrics)
-        .where(
-          and(
-            eq(eventMetrics.eventId, input.eventId),
-            sql`${eventMetrics.fetchDate} = ${latestDate.latest}`,
-          ),
-        )
+        .where(eq(eventMetrics.eventId, input.eventId))
+        .orderBy(desc(eventMetrics.fetchDate))
+        .limit(1)
         .as("latest_price");
 
       return await ctx.db
