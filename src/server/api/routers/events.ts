@@ -9,18 +9,7 @@ import {
   eventMetrics,
   artists,
 } from "@/server/db/schema";
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  gte,
-  ilike,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, ilike, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
@@ -127,77 +116,44 @@ export const eventsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      let comparisonPriceQuery;
-
-      if (input.windowDays === -1) {
-        // take the first price
-        comparisonPriceQuery = ctx.db
-          .select({
-            minPriceTotal:
-              sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
-                "min_price_total",
-              ),
-          })
-          .from(eventMetrics)
-          .where(eq(eventMetrics.eventId, input.eventId))
-          .orderBy(asc(eventMetrics.fetchDate))
-          .limit(1)
-          .as("comparison_date");
-      } else {
-        const dataCount = await ctx.db
-          .select({
-            count: count(),
-          })
-          .from(eventMetrics)
-          .where(eq(eventMetrics.eventId, input.eventId))
-          .then((rows) => rows[0]?.count);
-
-        if (!dataCount) return null;
-
-        comparisonPriceQuery = ctx.db
-          .select({
-            minPriceTotal:
-              sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
-                "min_price_total",
-              ),
-          })
-          .from(eventMetrics)
-          .where(eq(eventMetrics.eventId, input.eventId))
-          .orderBy(desc(eventMetrics.fetchDate))
-          .offset(Math.min(input.windowDays, dataCount))
-          .limit(1)
-          .as("comparison_date");
-      }
-
-      const latestPriceQuery = ctx.db
+      const metrics = await ctx.db
         .select({
-          currentPrice:
+          fetchDate: sql<Date>`${eventMetrics.fetchDate}`.as("fetch_date"),
+          minPriceTotal:
             sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
-              "current_price",
+              "min_price_total",
             ),
         })
         .from(eventMetrics)
-        .where(eq(eventMetrics.eventId, input.eventId))
+        .where(
+          and(
+            eq(eventMetrics.eventId, input.eventId),
+            gt(eventMetrics.minPriceTotal, 0),
+          ),
+        )
         .orderBy(desc(eventMetrics.fetchDate))
-        .limit(1)
-        .as("latest_price");
+        .limit(input.windowDays == -1 ? 730 : input.windowDays + 1);
 
-      return await ctx.db
-        .select({
-          currentPrice: latestPriceQuery.currentPrice,
-          rawChange:
-            sql<number>`${latestPriceQuery.currentPrice} - ${comparisonPriceQuery.minPriceTotal}`.as(
-              "raw_change",
-            ),
-          percentChange: sql<number>`CASE 
-            WHEN ${comparisonPriceQuery.minPriceTotal} > 0 
-            THEN CAST((${latestPriceQuery.currentPrice} - ${comparisonPriceQuery.minPriceTotal})::FLOAT / ${comparisonPriceQuery.minPriceTotal}::FLOAT AS FLOAT)
-            ELSE 0 
-          END`.as("percent_change"),
-        })
-        .from(latestPriceQuery)
-        .leftJoin(comparisonPriceQuery, sql`true`)
-        .then((rows) => rows[0]);
+      if (!metrics?.length) return null;
+
+      const currentPrice = metrics.at(0)?.minPriceTotal;
+      const historicalPrice = metrics.at(-1)?.minPriceTotal;
+
+      if (!historicalPrice)
+        return {
+          currentPrice,
+          rawChange: null,
+          percentChange: null,
+        };
+
+      const rawChange = (currentPrice ?? 0) - (historicalPrice ?? 0);
+      const percentChange = rawChange / (historicalPrice ?? 1);
+
+      return {
+        currentPrice,
+        rawChange,
+        percentChange,
+      };
     }),
 
   searchArtists: publicProcedure

@@ -134,7 +134,7 @@ export function FeaturedEvents({
                       className="font-medium tabular-nums"
                     />
                     <ChangeText
-                      value={eventPriceChange.percentChange}
+                      value={eventPriceChange.percentChange!}
                       className="text-sm font-medium"
                     />
                   </span>

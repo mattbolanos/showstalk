@@ -80,7 +80,7 @@ export function EventCard({
             </p>
             {eventPriceChange ? (
               <ChangeText
-                value={eventPriceChange?.percentChange}
+                value={eventPriceChange.percentChange!}
                 className="text-xs"
               />
             ) : (
