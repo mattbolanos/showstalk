@@ -10,7 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { SearchIcon, StarsIcon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import {
+  CalendarIcon,
+  ChevronDownIcon,
+  MicIcon,
+  SearchIcon,
+  StarsIcon,
+} from "lucide-react";
 import { EventChart, TIME_WINDOWS } from "./event-chart";
 import { EventCard, formatVenue } from "./event-card";
 import { TimeWindowSelect } from "./time-window-select";
@@ -85,7 +97,7 @@ export function FeaturedEvents({
       <div className="grid grid-cols-3 gap-4">
         <Button
           variant="outline"
-          className="ring-input/60 bg-input hover:bg-input/60 relative w-full shrink-0 grid-cols-1 justify-start p-0 px-3 py-2 ring"
+          className="ring-input/60 bg-input hover:bg-input/60 relative w-full shrink-0 grid-cols-1 justify-start rounded-sm p-0 px-3 py-2 ring"
           onMouseDown={() => setSearchOpen(true)}
         >
           <span className="text-muted-foreground inline-flex pl-6 text-left text-base">
@@ -121,13 +133,38 @@ export function FeaturedEvents({
           <CardHeader className="gap-0">
             <CardTitle className="flex items-center justify-between">
               {eventMeta && selectedEvent ? (
-                <Link
-                  prefetch={true}
-                  href={`/artist/${selectedEvent.artistId}`}
-                  className="underline-offset-4 hover:underline"
-                >
-                  {eventMeta.name}
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="group h-auto justify-start p-0 text-left hover:bg-transparent"
+                    >
+                      <div className="flex items-center gap-1">
+                        <h2 className="text-foreground group-hover:text-primary text-base transition-colors">
+                          {selectedEvent.artistName}
+                        </h2>
+                        <ChevronDownIcon className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link
+                        href={`/artist/${selectedEvent.artistId}`}
+                        prefetch={true}
+                      >
+                        <MicIcon className="size-4" />
+                        View Artist Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild className="cursor-pointer">
+                      <Link href={`/event/${selectedEventId}`} prefetch={true}>
+                        <CalendarIcon className="size-4" />
+                        View Event Details
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Skeleton className="h-5 w-40" />
               )}

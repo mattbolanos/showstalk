@@ -60,7 +60,7 @@ export function TimeWindowSelect({ className }: { className?: string }) {
         <div className="relative">
           {/* Hover Highlight */}
           <div
-            className="bg-accent absolute flex h-9 items-center rounded-[6px] transition-all duration-300 ease-out"
+            className="bg-accent absolute flex h-9 items-center rounded-sm transition-all duration-300 ease-out"
             style={{
               ...hoverStyle,
               opacity: hoveredIndex !== null ? 1 : 0,
@@ -69,7 +69,7 @@ export function TimeWindowSelect({ className }: { className?: string }) {
 
           {/* Active Indicator */}
           <div
-            className="bg-accent absolute h-9 rounded-[6px] transition-all duration-300 ease-out"
+            className="bg-accent absolute h-9 rounded-sm transition-all duration-300 ease-out"
             style={activeStyle}
           />
 

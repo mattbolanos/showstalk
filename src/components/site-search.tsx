@@ -161,7 +161,7 @@ export function SiteSearch() {
         <span className="text-muted-foreground inline-flex pl-6 text-left text-base">
           Search for an artist or location...
         </span>
-        <kbd className="bg-muted pointer-events-none absolute top-1/2 right-1.5 hidden h-5 shrink-0 -translate-y-1/2 items-center gap-1 rounded border px-1.5 font-mono text-xs font-medium opacity-100 select-none md:flex">
+        <kbd className="bg-muted pointer-events-none absolute top-1/2 right-1.5 hidden h-5 shrink-0 -translate-y-1/2 items-center gap-1 rounded-sm border px-1.5 font-mono text-xs font-medium opacity-100 select-none md:flex">
           <span className="text-xs">⌘</span>K
         </kbd>
         <div className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
