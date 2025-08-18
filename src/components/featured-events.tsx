@@ -21,6 +21,7 @@ import NumberFlow, { NumberFlowGroup } from "@number-flow/react";
 
 import { ChangeText } from "./change-text";
 import { Skeleton } from "./ui/skeleton";
+import Link from "next/link";
 
 type TrendingEvents = RouterOutputs["events"]["getTrending"];
 
@@ -75,6 +76,10 @@ export function FeaturedEvents({
     windowDays: TIME_WINDOWS[timeWindow].days,
   });
 
+  const selectedEvent = trendingEvents.find(
+    (event) => event.id === selectedEventId,
+  );
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
@@ -115,8 +120,14 @@ export function FeaturedEvents({
         <Card className="col-span-2 gap-4 pr-0 pb-0">
           <CardHeader className="gap-0">
             <CardTitle className="flex items-center justify-between">
-              {eventMeta ? (
-                <span>{eventMeta.name}</span>
+              {eventMeta && selectedEvent ? (
+                <Link
+                  prefetch={true}
+                  href={`/artist/${selectedEvent.artistId}`}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {eventMeta.name}
+                </Link>
               ) : (
                 <Skeleton className="h-5 w-40" />
               )}
@@ -145,7 +156,11 @@ export function FeaturedEvents({
             </CardTitle>
             <CardDescription className="flex items-center justify-between">
               {eventMeta ? (
-                <span>
+                <Link
+                  prefetch={true}
+                  href={`/event/${selectedEventId}`}
+                  className="underline-offset-4 hover:underline"
+                >
                   {formatVenue(
                     eventMeta.venueCity ?? "",
                     eventMeta.venueState ?? "",
@@ -153,7 +168,7 @@ export function FeaturedEvents({
                   )}{" "}
                   • {eventMeta.venueName} •{" "}
                   {formatDate(eventMeta.localDatetime ?? "")}
-                </span>
+                </Link>
               ) : (
                 <Skeleton className="h-5 w-20" />
               )}
