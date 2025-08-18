@@ -118,7 +118,7 @@ export function SiteSearch() {
     event: EventResult | TopEvent;
     href: string;
   }) => {
-    const eventDate = formatEventDate(event.localDatetime);
+    const eventDate = formatEventDate(event.localDatetime ?? "");
     return (
       <CommandItem
         key={event.id}
@@ -139,8 +139,8 @@ export function SiteSearch() {
             <span className="truncate font-medium">{event.name}</span>
             <p className="text-muted-foreground truncate text-xs tabular-nums">
               {formatVenue(
-                event.venueCity,
-                event.venueState,
+                event.venueCity ?? "",
+                event.venueState ?? "",
                 event.venueExtendedAddress ?? "",
               )}{" "}
               • {event.venueName}

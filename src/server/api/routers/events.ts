@@ -183,6 +183,7 @@ export const eventsRouter = createTRPCRouter({
             new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
           ),
         ),
+        orderBy: [desc(eventMeta.localDatetime)],
         with: {
           eventArtists: {
             with: {

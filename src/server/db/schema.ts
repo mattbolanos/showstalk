@@ -60,6 +60,7 @@ export const eventMeta = ticketSchema.table(
     index("event_meta_venue_name_idx").on(t.venueName),
     index("event_meta_venue_city_idx").on(t.venueCity),
     index("event_meta_venue_state_idx").on(t.venueState),
+    index("event_meta_local_datetime_idx").on(t.localDatetime),
   ],
 );
 

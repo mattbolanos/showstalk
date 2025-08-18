@@ -1,0 +1,2 @@
+ALTER TABLE "ticket"."event_metrics" ALTER COLUMN "fetch_date" SET DATA TYPE date;--> statement-breakpoint
+CREATE INDEX "event_meta_local_datetime_idx" ON "ticket"."event_meta" USING btree ("local_datetime");
