@@ -21,7 +21,7 @@ export function EventChart({
   trendDirection,
 }: {
   eventMetrics: {
-    fetchDate: Date;
+    fetchDate: Date | string;
     minPriceTotal: number;
   }[];
   version?: "icon" | "full";

@@ -78,22 +78,17 @@ export const eventsRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return ctx.db
-        .select({
-          fetchDate: sql<Date>`${eventMetrics.fetchDate}`.as("fetch_date"),
-          minPriceTotal:
-            sql<number>`CAST(${eventMetrics.minPriceTotal} AS INT)`.as(
-              "min_price_total",
-            ),
-        })
-        .from(eventMetrics)
-        .where(
-          and(
-            eq(eventMetrics.eventId, input.eventId),
-            gt(eventMetrics.minPriceTotal, 0),
-          ),
-        )
-        .orderBy(asc(eventMetrics.fetchDate));
+      return ctx.db.query.eventMetrics.findMany({
+        where: and(
+          eq(eventMetrics.eventId, input.eventId),
+          gt(eventMetrics.minPriceTotal, 0),
+        ),
+        columns: {
+          fetchDate: true,
+          minPriceTotal: true,
+        },
+        orderBy: asc(eventMetrics.fetchDate),
+      });
     }),
 
   getEventMeta: publicProcedure
