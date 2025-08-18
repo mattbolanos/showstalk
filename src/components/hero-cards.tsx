@@ -35,7 +35,7 @@ export const HeroCardVisual = ({
 
       {/* Animated Soundwaves */}
       <svg
-        className="absolute top-1/2 left-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 opacity-90"
+        className="absolute top-1/2 left-1/2 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 opacity-90"
         viewBox="0 0 400 240"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +84,7 @@ export const HeroCardVisual = ({
         <path
           d="M0 120 Q100 40 200 120 T400 120"
           stroke="url(#waveGradient)"
-          strokeWidth="4"
+          strokeWidth="3.5"
           strokeLinecap="round"
           fill="none"
           opacity="0.8"
