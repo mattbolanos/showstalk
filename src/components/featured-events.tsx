@@ -21,7 +21,7 @@ import {
   ChevronDownIcon,
   MicIcon,
   SearchIcon,
-  StarsIcon,
+  TrendingUpIcon,
 } from "lucide-react";
 import { EventChart, TIME_WINDOWS } from "./event-chart";
 import { EventCard, formatVenue } from "./event-card";
@@ -114,7 +114,7 @@ export function FeaturedEvents({
         <Card className="col-span-1 gap-0 overflow-hidden px-0 pt-4 pb-0 sm:px-0">
           <CardHeader className="px-2">
             <CardTitle className="text-primary flex items-center gap-2">
-              <StarsIcon className="text-primary size-4" /> Trending Events
+              <TrendingUpIcon className="text-primary size-4" /> Trending Events
             </CardTitle>
           </CardHeader>
 
