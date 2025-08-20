@@ -164,7 +164,6 @@ export const eventsRouter = createTRPCRouter({
         limit: 10,
         columns: {
           name: true,
-          slug: true,
           image: true,
           genre: true,
           id: true,
