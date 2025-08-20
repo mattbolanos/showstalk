@@ -57,6 +57,13 @@
       "when": 1755490390944,
       "tag": "0007_big_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1755661542860,
+      "tag": "0008_naive_mojo",
+      "breakpoints": true
     }
   ]
 }

@@ -133,13 +133,13 @@ export const HeroCardVisual = ({
       {children ?? (
         <>
           <div className="animate-float absolute top-2 left-6 -rotate-8">
-            <div className="h-24 w-48 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 p-4 shadow-lg" />
+            <div className="h-22 w-[150px] rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 p-4 shadow-lg" />
           </div>
           <div className="animate-float absolute top-22 right-4 rotate-5 [animation-delay:2s]">
-            <div className="h-24 w-48 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 p-4 shadow-lg" />
+            <div className="h-22 w-[150px] rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 p-4 shadow-lg" />
           </div>
           <div className="animate-float absolute bottom-19 left-12 rotate-4 [animation-delay:4s]">
-            <div className="h-24 w-48 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 p-4 shadow-lg" />
+            <div className="h-22 w-[150px] rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 p-4 shadow-lg" />
           </div>
         </>
       )}

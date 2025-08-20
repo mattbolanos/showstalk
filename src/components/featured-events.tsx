@@ -150,7 +150,7 @@ export function FeaturedEvents({
                   <DropdownMenuContent align="start" className="w-48">
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link
-                        href={`/artist/${selectedEvent.artistId}`}
+                        href={`/artist/${selectedEvent.artistInternalId}`}
                         prefetch={true}
                       >
                         <MicVocalIcon className="stroke-1.5 stroke-primary size-4" />
@@ -201,7 +201,7 @@ export function FeaturedEvents({
                   {formatVenue(
                     eventMeta.venueCity ?? "",
                     eventMeta.venueState ?? "",
-                    eventMeta.venueStreetAddress ?? "",
+                    eventMeta.venueExtendedAddress ?? "",
                   )}{" "}
                   • {eventMeta.venueName} •{" "}
                   {formatDate(eventMeta.localDatetime ?? "")}

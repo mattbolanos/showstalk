@@ -42,6 +42,7 @@ const getTrending = async (ctx: Context) => {
       id: rankedEvents.eventId,
       name: eventMeta.name,
       artistId: rankedEvents.artistId,
+      artistInternalId: artists.id,
       artistName: artists.name,
       artistImage: artists.image,
       venueCity: eventMeta.venueCity,
@@ -54,7 +55,7 @@ const getTrending = async (ctx: Context) => {
     })
     .from(rankedEvents)
     .leftJoin(eventMeta, eq(eventMeta.id, rankedEvents.eventId))
-    .leftJoin(artists, eq(artists.id, rankedEvents.artistId))
+    .leftJoin(artists, eq(artists.ticketmasterId, rankedEvents.artistId))
     .where(
       and(
         eq(rankedEvents.artistRank, 1),
@@ -99,6 +100,15 @@ export const eventsRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       return ctx.db.query.eventMeta.findFirst({
+        columns: {
+          id: false,
+          name: true,
+          venueCity: true,
+          venueState: true,
+          venueName: true,
+          venueExtendedAddress: true,
+          localDatetime: true,
+        },
         where: eq(eventMeta.id, input.eventId),
       });
     }),
@@ -152,6 +162,13 @@ export const eventsRouter = createTRPCRouter({
           ilike(artists.slug, `%${input.query}%`),
         ),
         limit: 10,
+        columns: {
+          name: true,
+          slug: true,
+          image: true,
+          genre: true,
+          id: true,
+        },
       });
     }),
 
@@ -163,6 +180,16 @@ export const eventsRouter = createTRPCRouter({
       const searchTerms = input.query.split(" ").filter(Boolean);
 
       return ctx.db.query.eventMeta.findMany({
+        limit: 10,
+        columns: {
+          id: true,
+          name: true,
+          venueCity: true,
+          venueState: true,
+          venueName: true,
+          localDatetime: true,
+          venueExtendedAddress: true,
+        },
         where: and(
           ...searchTerms.map((term) =>
             or(
@@ -190,7 +217,6 @@ export const eventsRouter = createTRPCRouter({
             },
           },
         },
-        limit: 8,
       });
     }),
 });

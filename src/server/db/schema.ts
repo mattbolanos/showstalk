@@ -1,7 +1,6 @@
 import {
   text,
   pgSchema,
-  serial,
   numeric,
   foreignKey,
   primaryKey,
@@ -17,7 +16,8 @@ const ticketSchema = pgSchema("ticket");
 export const artists = ticketSchema.table(
   "artists",
   {
-    id: serial("id").primaryKey(),
+    ticketmasterId: text("ticketmaster_id").notNull().primaryKey(),
+    id: text("id").notNull(),
     name: text("name").notNull(),
     upcoming_shows: numeric("upcoming_shows"),
     image: text("image"),
@@ -74,7 +74,7 @@ export const eventArtists = ticketSchema.table(
     primaryKey({ columns: [t.eventId, t.artistId] }),
     foreignKey({
       columns: [t.artistId],
-      foreignColumns: [artists.id],
+      foreignColumns: [artists.ticketmasterId],
     }),
     foreignKey({
       columns: [t.eventId],
@@ -129,7 +129,7 @@ export const eventArtistsRelations = relations(eventArtists, ({ one }) => ({
   }),
   artist: one(artists, {
     fields: [eventArtists.artistId],
-    references: [artists.id],
+    references: [artists.ticketmasterId],
     relationName: "artist",
   }),
 }));

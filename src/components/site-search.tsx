@@ -30,6 +30,7 @@ import { ArtistImage } from "./artist-image";
 
 type EventResult = RouterOutputs["events"]["searchEvents"][number];
 type TopEvent = RouterOutputs["events"]["getTrending"][number];
+type ArtistResult = RouterOutputs["events"]["searchArtists"][number];
 
 const formatEventDate = (localDatetime: string) => {
   const date = new Date(localDatetime);
@@ -123,6 +124,7 @@ export function SiteSearch() {
     href: string;
   }) => {
     const eventDate = formatEventDate(event.localDatetime ?? "");
+
     return (
       <CommandItem key={event.id} onSelect={handleSelect} asChild>
         <Link href={href} prefetch={true}>
@@ -151,6 +153,33 @@ export function SiteSearch() {
       </CommandItem>
     );
   };
+
+  const ArtistItem = ({
+    artist,
+    href,
+  }: {
+    artist: ArtistResult;
+    href: string;
+  }) => (
+    <CommandItem
+      key={artist.id}
+      onSelect={handleSelect}
+      className="flex items-center gap-3"
+      asChild
+    >
+      <Link href={href} prefetch={true}>
+        <ArtistImage
+          imageUrl={artist.image ?? ""}
+          artistName={artist.name}
+          containerClassName="size-10"
+        />
+        <div className="flex flex-col">
+          <span className="font-medium">{artist.name}</span>
+          <p className="text-muted-foreground text-xs">{artist.genre}</p>
+        </div>
+      </Link>
+    </CommandItem>
+  );
 
   return (
     <div className="flex w-full justify-center px-6 md:px-0">
@@ -208,32 +237,13 @@ export function SiteSearch() {
                   </span>
                 }
               >
-                {artistsResults.map((artist) => {
-                  const href = `/artist/${artist.id}`;
-
-                  return (
-                    <CommandItem
-                      key={artist.id}
-                      onSelect={handleSelect}
-                      className="flex items-center gap-3"
-                      asChild
-                    >
-                      <Link href={href} prefetch={true}>
-                        <ArtistImage
-                          imageUrl={artist.image ?? ""}
-                          artistName={artist.name}
-                          containerClassName="size-10"
-                        />
-                        <div className="flex flex-col">
-                          <span className="font-medium">{artist.name}</span>
-                          <p className="text-muted-foreground text-xs">
-                            {artist.genre}
-                          </p>
-                        </div>
-                      </Link>
-                    </CommandItem>
-                  );
-                })}
+                {artistsResults.map((artist) => (
+                  <ArtistItem
+                    key={artist.id}
+                    href={`/artist/${artist.id}`}
+                    artist={artist}
+                  />
+                ))}
               </CommandGroup>
             )}
 
@@ -249,11 +259,13 @@ export function SiteSearch() {
                   </span>
                 }
               >
-                {eventsResults?.map((event) => {
-                  const href = `/event/${event.id}`;
-
-                  return <EventItem key={event.id} href={href} event={event} />;
-                })}
+                {eventsResults?.map((event) => (
+                  <EventItem
+                    key={event.id}
+                    href={`/event/${event.id}`}
+                    event={event}
+                  />
+                ))}
               </CommandGroup>
             )}
             {!query && (
@@ -268,11 +280,15 @@ export function SiteSearch() {
                   </span>
                 }
               >
-                {topEvents?.slice(0, 5).map((event) => {
-                  const href = `/event/${event.id}`;
-
-                  return <EventItem key={event.id} href={href} event={event} />;
-                })}
+                {topEvents
+                  ?.slice(0, 5)
+                  .map((event) => (
+                    <EventItem
+                      key={event.id}
+                      href={`/event/${event.id}`}
+                      event={event}
+                    />
+                  ))}
               </CommandGroup>
             )}
           </Command>
