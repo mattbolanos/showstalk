@@ -17,10 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import {
-  CalendarIcon,
   ChevronDownIcon,
-  MicIcon,
+  MicVocalIcon,
   SearchIcon,
+  TicketIcon,
   TrendingUpIcon,
 } from "lucide-react";
 import { EventChart, TIME_WINDOWS } from "./event-chart";
@@ -153,13 +153,13 @@ export function FeaturedEvents({
                         href={`/artist/${selectedEvent.artistId}`}
                         prefetch={true}
                       >
-                        <MicIcon className="size-4" />
+                        <MicVocalIcon className="stroke-1.5 stroke-primary size-4" />
                         View Artist Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link href={`/event/${selectedEventId}`} prefetch={true}>
-                        <CalendarIcon className="size-4" />
+                        <TicketIcon className="stroke-1.5 stroke-primary size-4" />
                         View Event Details
                       </Link>
                     </DropdownMenuItem>

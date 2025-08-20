@@ -19,7 +19,9 @@ export function SiteNav() {
             className="fill-primary stroke-orange-500/20"
             strokeWidth={2}
           />
-          <p className="text-primary text-lg font-semibold">Showstalk</p>
+          <p className="text-primary hidden text-lg font-semibold md:block">
+            Showstalk
+          </p>
         </Link>
         {/* Search form */}
         <SiteSearch />

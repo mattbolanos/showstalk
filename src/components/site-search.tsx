@@ -16,9 +16,15 @@ import {
 } from "./ui/command";
 import { DialogTitle } from "./ui/dialog";
 import { formatVenue } from "./event-card";
-import { LoaderIcon, SearchIcon, TrendingUpIcon } from "lucide-react";
+import {
+  LoaderIcon,
+  MicVocalIcon,
+  SearchIcon,
+  TicketIcon,
+  TrendingUpIcon,
+} from "lucide-react";
 import { useSearch } from "@/stores/use-search";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import { ArtistImage } from "./artist-image";
 
@@ -47,7 +53,6 @@ const formatEventDate = (localDatetime: string) => {
 };
 
 export function SiteSearch() {
-  const router = useRouter();
   const { searchOpen, setSearchOpen } = useSearch();
   const [value, setValue] = React.useState("");
   const [query, setQuery] = React.useState("");
@@ -104,8 +109,7 @@ export function SiteSearch() {
   const totalResults =
     (artistsResults?.length ?? 0) + (eventsResults?.length ?? 0);
 
-  const handleSelect = (href: string) => {
-    router.push(href);
+  const handleSelect = () => {
     setSearchOpen(false);
     setValue("");
     setQuery("");
@@ -120,45 +124,42 @@ export function SiteSearch() {
   }) => {
     const eventDate = formatEventDate(event.localDatetime ?? "");
     return (
-      <CommandItem
-        key={event.id}
-        onSelect={() => {
-          handleSelect(href);
-        }}
-      >
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex w-10 flex-shrink-0 flex-col">
-            <span className="text-primary text-sm font-semibold tabular-nums">
-              {eventDate.date}
-            </span>
-            <span className="text-muted-foreground text-xs">
-              {eventDate.weekday}
-            </span>
+      <CommandItem key={event.id} onSelect={handleSelect} asChild>
+        <Link href={href} prefetch={true}>
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex w-10 flex-shrink-0 flex-col">
+              <span className="text-primary text-sm font-semibold tabular-nums">
+                {eventDate.date}
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {eventDate.weekday}
+              </span>
+            </div>
+            <div className="flex min-w-0 flex-col">
+              <span className="truncate font-medium">{event.name}</span>
+              <p className="text-muted-foreground truncate text-xs tabular-nums">
+                {formatVenue(
+                  event.venueCity ?? "",
+                  event.venueState ?? "",
+                  event.venueExtendedAddress ?? "",
+                )}{" "}
+                • {event.venueName}
+              </p>
+            </div>
           </div>
-          <div className="flex min-w-0 flex-col">
-            <span className="truncate font-medium">{event.name}</span>
-            <p className="text-muted-foreground truncate text-xs tabular-nums">
-              {formatVenue(
-                event.venueCity ?? "",
-                event.venueState ?? "",
-                event.venueExtendedAddress ?? "",
-              )}{" "}
-              • {event.venueName}
-            </p>
-          </div>
-        </div>
+        </Link>
       </CommandItem>
     );
   };
 
   return (
-    <div className="flex w-full justify-center">
+    <div className="flex w-full justify-center px-6 md:px-0">
       <Button
         variant="outline"
-        className="ring-input/60 bg-input hover:bg-input/80 relative w-96 shrink-0 justify-start p-0 px-3 py-2 ring"
+        className="ring-input/60 bg-input hover:bg-input/80 relative w-full shrink-0 justify-start px-3 py-2 ring md:w-96"
         onMouseDown={() => setSearchOpen(true)}
       >
-        <span className="text-muted-foreground inline-flex pl-6 text-left text-base">
+        <span className="text-muted-foreground inline-flex pl-6 text-left text-sm sm:text-base">
           Search for an artist or location...
         </span>
         <kbd className="bg-muted pointer-events-none absolute top-1/2 right-1.5 hidden h-5 shrink-0 -translate-y-1/2 items-center gap-1 rounded-sm border px-1.5 font-mono text-xs font-medium opacity-100 select-none md:flex">
@@ -196,30 +197,40 @@ export function SiteSearch() {
             </CommandEmpty>
 
             {artistsResults && artistsResults.length > 0 && (
-              <CommandGroup heading="Artists">
+              <CommandGroup
+                heading={
+                  <span className="flex items-center gap-2">
+                    <MicVocalIcon
+                      size={16}
+                      className="stroke-primary stroke-1.5"
+                    />
+                    Artists
+                  </span>
+                }
+              >
                 {artistsResults.map((artist) => {
                   const href = `/artist/${artist.id}`;
-                  router.prefetch(href);
 
                   return (
                     <CommandItem
                       key={artist.id}
-                      onSelect={() => {
-                        handleSelect(href);
-                      }}
+                      onSelect={handleSelect}
                       className="flex items-center gap-3"
+                      asChild
                     >
-                      <ArtistImage
-                        imageUrl={artist.image ?? ""}
-                        artistName={artist.name}
-                        containerClassName="size-10"
-                      />
-                      <div className="flex flex-col">
-                        <span className="font-medium">{artist.name}</span>
-                        <p className="text-muted-foreground text-xs">
-                          {artist.genre}
-                        </p>
-                      </div>
+                      <Link href={href} prefetch={true}>
+                        <ArtistImage
+                          imageUrl={artist.image ?? ""}
+                          artistName={artist.name}
+                          containerClassName="size-10"
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{artist.name}</span>
+                          <p className="text-muted-foreground text-xs">
+                            {artist.genre}
+                          </p>
+                        </div>
+                      </Link>
                     </CommandItem>
                   );
                 })}
@@ -227,10 +238,19 @@ export function SiteSearch() {
             )}
 
             {eventsResults && eventsResults.length > 0 && (
-              <CommandGroup heading="Events">
+              <CommandGroup
+                heading={
+                  <span className="flex items-center gap-2">
+                    <TicketIcon
+                      size={16}
+                      className="stroke-primary stroke-1.5"
+                    />
+                    Events
+                  </span>
+                }
+              >
                 {eventsResults?.map((event) => {
                   const href = `/event/${event.id}`;
-                  router.prefetch(href);
 
                   return <EventItem key={event.id} href={href} event={event} />;
                 })}
@@ -240,14 +260,16 @@ export function SiteSearch() {
               <CommandGroup
                 heading={
                   <span className="flex items-center gap-2">
-                    <TrendingUpIcon size={16} className="stroke-primary" />
+                    <TrendingUpIcon
+                      size={16}
+                      className="stroke-primary stroke-1.5"
+                    />
                     Trending
                   </span>
                 }
               >
                 {topEvents?.slice(0, 5).map((event) => {
                   const href = `/event/${event.id}`;
-                  router.prefetch(href);
 
                   return <EventItem key={event.id} href={href} event={event} />;
                 })}
