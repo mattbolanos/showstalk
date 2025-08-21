@@ -42,7 +42,6 @@ const getTrending = async (ctx: Context) => {
       id: rankedEvents.eventId,
       name: eventMeta.name,
       artistId: rankedEvents.artistId,
-      artistInternalId: artists.id,
       artistName: artists.name,
       artistImage: artists.image,
       venueCity: eventMeta.venueCity,
@@ -55,7 +54,7 @@ const getTrending = async (ctx: Context) => {
     })
     .from(rankedEvents)
     .leftJoin(eventMeta, eq(eventMeta.id, rankedEvents.eventId))
-    .leftJoin(artists, eq(artists.ticketmasterId, rankedEvents.artistId))
+    .leftJoin(artists, eq(artists.id, rankedEvents.artistId))
     .where(
       and(
         eq(rankedEvents.artistRank, 1),

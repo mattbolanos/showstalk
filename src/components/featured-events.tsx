@@ -150,7 +150,7 @@ export function FeaturedEvents({
                   <DropdownMenuContent align="start" className="w-48">
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link
-                        href={`/artist/${selectedEvent.artistInternalId}`}
+                        href={`/artist/${selectedEvent.artistId}`}
                         prefetch={true}
                       >
                         <MicVocalIcon className="stroke-1.5 stroke-primary size-4" />

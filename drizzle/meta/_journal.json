@@ -64,6 +64,13 @@
       "when": 1755661542860,
       "tag": "0008_naive_mojo",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1755785239490,
+      "tag": "0009_rainy_logan",
+      "breakpoints": true
     }
   ]
 }
