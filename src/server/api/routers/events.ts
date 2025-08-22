@@ -155,66 +155,67 @@ export const eventsRouter = createTRPCRouter({
   searchArtists: publicProcedure
     .input(z.object({ query: z.string() }))
     .query(async ({ ctx, input }) => {
-      return ctx.db.query.artists.findMany({
-        where: or(
-          ilike(artists.name, `%${input.query}%`),
-          ilike(artists.slug, `%${input.query}%`),
-        ),
-        limit: 10,
-        columns: {
-          name: true,
-          image: true,
-          genre: true,
-          id: true,
-        },
-      });
+      const q = input.query;
+
+      return ctx.db
+        .select({
+          id: artists.id,
+          name: artists.name,
+          image: artists.image,
+          genre: artists.genre,
+        })
+        .from(artists)
+        .where(
+          or(
+            ilike(artists.name, `%${q}%`),
+            ilike(artists.slug, `%${q}%`),
+            sql`((${artists.name} || ' ' || ${artists.slug}) % ${q})`,
+          ),
+        )
+        .orderBy(
+          sql`
+          CASE 
+            WHEN ${artists.name} ILIKE ${"%" + q + "%"} 
+              OR ${artists.slug} ILIKE ${"%" + q + "%"} 
+            THEN 1 ELSE 2 
+          END,
+          similarity((${artists.name} || ' ' || ${artists.slug}), ${q}) DESC
+        `,
+        )
+        .limit(10);
     }),
 
   searchEvents: publicProcedure
     .input(z.object({ query: z.string() }))
     .query(async ({ ctx, input }) => {
-      if (input.query.length < 2) return [];
+      const q = input.query.trim();
+      if (q.length < 2) return [];
 
-      const searchTerms = input.query.split(" ").filter(Boolean);
-
-      return ctx.db.query.eventMeta.findMany({
-        limit: 10,
-        columns: {
-          id: true,
-          name: true,
-          venueCity: true,
-          venueState: true,
-          venueName: true,
-          localDatetime: true,
-          venueExtendedAddress: true,
-        },
-        where: and(
-          ...searchTerms.map((term) =>
-            or(
-              ilike(eventMeta.name, `%${term}%`),
-              ilike(artists.name, `%${term}%`),
-              ilike(eventMeta.venueName, `%${term}%`),
-              ilike(eventMeta.venueCity, `%${term}%`),
-              ilike(eventMeta.venueState, `%${term}%`),
+      return ctx.db
+        .select({
+          id: eventMeta.id,
+          name: eventMeta.name,
+          venueCity: eventMeta.venueCity,
+          venueState: eventMeta.venueState,
+          venueName: eventMeta.venueName,
+          venueExtendedAddress: eventMeta.venueExtendedAddress,
+          localDatetime: eventMeta.localDatetime,
+        })
+        .from(eventMeta)
+        .where(
+          and(
+            sql`
+            ((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}) % ${q})
+          `,
+            gte(
+              eventMeta.localDatetime,
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
             ),
           ),
-          gte(
-            eventMeta.localDatetime,
-            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          ),
-        ),
-        orderBy: [desc(eventMeta.localDatetime)],
-        with: {
-          eventArtists: {
-            with: {
-              artist: {
-                columns: {
-                  name: true,
-                },
-              },
-            },
-          },
-        },
-      });
+        )
+        .orderBy(
+          sql`similarity((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}), ${q}) DESC`,
+        )
+        .limit(10);
     }),
 });
