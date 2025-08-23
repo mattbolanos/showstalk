@@ -7,6 +7,7 @@ import { SiteNav } from "@/components/site-nav";
 import { HydrateClient } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "./theme-provider";
+import { ReactScan } from "./react-scan-provider";
 
 export const metadata: Metadata = {
   title: "Showstalk",
@@ -33,18 +34,10 @@ export default function RootLayout({
       className={`${geist.variable} ${geistMono.variable} antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        {process.env.NODE_ENV === "development" && (
-          <script
-            async
-            crossOrigin="anonymous"
-            src="//unpkg.com/react-scan/dist/auto.global.js"
-          />
-        )}
-      </head>
       <body>
         <TRPCReactProvider>
           <HydrateClient>
+            <ReactScan />
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
