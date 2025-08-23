@@ -128,6 +128,7 @@ export function FeaturedEvents({
               isSelected={event.id === selectedEventId}
               onSelect={() => setSelectedEventId(event.id)}
               selectedTimeWindow={timeWindow}
+              disableAnimations={isTouch}
               className="last:border-b-0"
             />
           ))}
@@ -226,7 +227,6 @@ export function FeaturedEvents({
                   : "bad"
               }
               version="full"
-              disableAnimations={isTouch}
             />
           </CardContent>
         </Card>
