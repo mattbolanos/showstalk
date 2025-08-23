@@ -19,6 +19,7 @@ export function EventChart({
   eventMetrics,
   version,
   trendDirection,
+  disableAnimations,
 }: {
   eventMetrics: {
     fetchDate: Date | string;
@@ -26,6 +27,7 @@ export function EventChart({
   }[];
   version?: "icon" | "full";
   trendDirection: "good" | "bad";
+  disableAnimations?: boolean;
 }) {
   const timeWindow = useTimeWindow((state) => state.timeWindow);
 
@@ -210,6 +212,7 @@ export function EventChart({
               : "var(--color-change-bad)"
           }
           animationDuration={800}
+          isAnimationActive={!disableAnimations}
         />
       </AreaChart>
     </ChartContainer>
