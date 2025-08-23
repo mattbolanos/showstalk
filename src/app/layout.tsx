@@ -8,6 +8,7 @@ import { HydrateClient } from "@/trpc/server";
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "./theme-provider";
 import { ReactScan } from "./react-scan-provider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "Showstalk",
@@ -48,6 +49,7 @@ export default function RootLayout({
               <main className="mx-auto w-full max-w-screen-xl px-3 py-8">
                 {children}
               </main>
+              <SpeedInsights />
             </ThemeProvider>
           </HydrateClient>
         </TRPCReactProvider>
