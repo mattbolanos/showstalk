@@ -46,7 +46,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <SiteNav />
-              <main className="mx-auto w-full max-w-screen-xl px-3 py-8">
+              <main className="mx-auto w-full max-w-screen-xl px-3 pb-16 pt-8">
                 {children}
               </main>
               <SpeedInsights />
