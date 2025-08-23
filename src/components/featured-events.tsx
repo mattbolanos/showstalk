@@ -94,23 +94,23 @@ export function FeaturedEvents({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="gap-4 md:grid md:grid-cols-3">
         <Button
           variant="outline"
-          className="ring-input/60 bg-input hover:bg-input/60 relative w-full shrink-0 grid-cols-1 justify-start rounded-sm p-0 px-3 py-2 ring"
+          className="ring-input/60 bg-input hover:bg-input/60 relative col-span-1 w-full shrink-0 justify-start rounded-sm p-0 px-3 py-2 ring"
           onMouseDown={() => setSearchOpen(true)}
         >
           <span className="text-muted-foreground inline-flex pl-6 text-left text-base">
-            Search for an artist or location...
+            Search...
           </span>
           <div className="text-muted-foreground pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
             <SearchIcon size={16} strokeWidth={2} aria-hidden="true" />
           </div>
         </Button>
-        <TimeWindowSelect className="col-span-2 w-full justify-start" />
+        <TimeWindowSelect className="col-span-2 hidden w-full justify-start md:block" />
       </div>
 
-      <div className="space-y-4 md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
+      <div className="md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
         <Card className="col-span-1 gap-0 overflow-hidden px-0 pt-4 pb-0 sm:px-0">
           <CardHeader className="px-2">
             <CardTitle className="text-primary flex items-center gap-2">
@@ -129,7 +129,7 @@ export function FeaturedEvents({
             />
           ))}
         </Card>
-        <Card className="col-span-2 gap-4 pr-0 pb-0">
+        <Card className="col-span-2 hidden gap-4 pr-0 pb-0 md:block">
           <CardHeader className="gap-0">
             <CardTitle className="flex items-center justify-between">
               {eventMeta && selectedEvent ? (
