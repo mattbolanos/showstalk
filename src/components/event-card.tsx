@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ChangeText } from "./change-text";
 import { EventChart, TIME_WINDOWS } from "./event-chart";
 import { Skeleton } from "./ui/skeleton";
+import { useIsTouch } from "@/lib/use-is-touch";
 
 type Event = RouterOutputs["events"]["getTrending"][number];
 
@@ -37,6 +38,7 @@ export function EventCard({
   selectedTimeWindow: keyof typeof TIME_WINDOWS;
   className?: string;
 }) {
+  const isTouch = useIsTouch();
   const { data: eventMetrics } = api.events.getEventMetrics.useQuery({
     eventId: event.id,
   });
@@ -97,6 +99,7 @@ export function EventCard({
                 : "bad"
             }
             version="icon"
+            disableAnimations={isTouch}
           />
         ) : (
           <Skeleton className="bg-primary/10 h-10 w-23 rounded-xs" />

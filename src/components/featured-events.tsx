@@ -34,7 +34,7 @@ import NumberFlow, { NumberFlowGroup } from "@number-flow/react";
 import { ChangeText } from "./change-text";
 import { Skeleton } from "./ui/skeleton";
 import Link from "next/link";
-
+import { useIsTouch } from "@/lib/use-is-touch";
 
 type TrendingEvents = RouterOutputs["events"]["getTrending"];
 
@@ -93,7 +93,7 @@ export function FeaturedEvents({
     (event) => event.id === selectedEventId,
   );
 
-
+  const isTouch = useIsTouch();
 
   return (
     <div className="space-y-4">
@@ -226,6 +226,7 @@ export function FeaturedEvents({
                   : "bad"
               }
               version="full"
+              disableAnimations={isTouch}
             />
           </CardContent>
         </Card>
