@@ -279,6 +279,7 @@ export function FeaturedEvents({
                     ? "good"
                     : "bad"
                 }
+                disableAnimations
                 version="full"
                 className="ml-4 pr-4"
               />
