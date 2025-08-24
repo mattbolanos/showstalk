@@ -35,7 +35,7 @@ export default function RootLayout({
       className={`${geist.variable} ${geistMono.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body>
+      <body className="overscroll-none">
         <TRPCReactProvider>
           <HydrateClient>
             <ReactScan />
