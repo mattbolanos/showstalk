@@ -262,7 +262,7 @@ export function FeaturedEvents({
 
         {selectedEvent && (
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-            <DrawerContent className="min-h-[97svh]">
+            <DrawerContent className="min-h-[90svh]">
               <DrawerHeader>
                 <DrawerTitle className="pl-0 text-left">
                   {selectedEvent.artistName}
