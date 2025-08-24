@@ -35,7 +35,7 @@ export default function RootLayout({
       className={`${geist.variable} ${geistMono.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body className="overscroll-none">
+      <body className="overscroll-y-contain">
         <TRPCReactProvider>
           <HydrateClient>
             <ReactScan />
@@ -46,7 +46,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <SiteNav />
-              <main className="mx-auto w-full max-w-screen-xl px-3 pb-16 pt-8">
+              <main className="mx-auto w-full max-w-screen-xl px-3 pt-8 pb-12">
                 {children}
               </main>
               <SpeedInsights />

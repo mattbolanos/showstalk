@@ -22,13 +22,13 @@ export const HeroCardVisual = ({
 
       {/* Floating Music Icons */}
       <div className="pointer-events-none absolute inset-0 z-5">
-        <div className="animate-drift absolute top-[9%] right-[42%] -rotate-12 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg [animation-delay:0.5s]">
+        <div className="animate-drift absolute top-[3%] right-[24%] -rotate-12 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 p-3 shadow-lg [animation-delay:0.5s] sm:top-[9%] sm:right-[42%]">
           <MusicIcon className="size-6 stroke-white stroke-2" />
         </div>
         <div className="animate-drift absolute top-[35%] left-[15%] rotate-[15deg] rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 p-3 shadow-lg [animation-delay:2.5s]">
           <GuitarIcon className="size-6 stroke-white stroke-2" />
         </div>
-        <div className="animate-drift absolute right-[22%] bottom-[32%] -rotate-[8deg] rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 p-3 shadow-lg [animation-delay:3.8s]">
+        <div className="animate-drift absolute right-[22%] bottom-[20%] -rotate-[8deg] rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 p-3 shadow-lg [animation-delay:3.8s] sm:bottom-[32%]">
           <AudioLinesIcon className="size-6 stroke-white stroke-2" />
         </div>
       </div>

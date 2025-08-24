@@ -11,6 +11,15 @@ import {
   CardTitle,
 } from "./ui/card";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose,
+} from "./ui/drawer";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -56,6 +65,7 @@ export function FeaturedEvents({
 
   const timeWindow = useTimeWindow((state) => state.timeWindow);
   const setSearchOpen = useSearch((state) => state.setSearchOpen);
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
   trendingEvents.map((event) => {
     api.events.getEventMeta.usePrefetchQuery({
@@ -94,10 +104,19 @@ export function FeaturedEvents({
   );
 
   const isTouch = useIsTouch();
+  const handleSelectEvent = (eventId: string) => {
+    setSelectedEventId(eventId);
+  };
+
+  const handleSelectEventMobile = (eventId: string) => {
+    setSelectedEventId(eventId);
+    setIsDrawerOpen(true);
+  };
 
   return (
     <div className="space-y-4">
       <div className="gap-4 md:grid md:grid-cols-3">
+        {/* Search button */}
         <Button
           variant="outline"
           className="ring-input/60 bg-input hover:bg-input/60 relative col-span-1 w-full shrink-0 justify-start rounded-sm p-0 px-3 py-2 ring"
@@ -110,10 +129,12 @@ export function FeaturedEvents({
             <SearchIcon size={16} strokeWidth={2} aria-hidden="true" />
           </div>
         </Button>
+        {/* Time window select */}
         <TimeWindowSelect className="col-span-2 hidden w-full justify-start md:block" />
       </div>
 
       <div className="md:grid md:grid-cols-3 md:gap-4 md:space-y-0">
+        {/* Trending events selector */}
         <Card className="col-span-1 gap-0 overflow-hidden px-0 pt-4 pb-0 sm:px-0">
           <CardHeader className="px-2">
             <CardTitle className="text-primary flex items-center gap-2">
@@ -126,12 +147,25 @@ export function FeaturedEvents({
               key={event.id}
               event={event}
               isSelected={event.id === selectedEventId}
-              onSelect={() => setSelectedEventId(event.id)}
+              onSelect={handleSelectEvent}
               selectedTimeWindow={timeWindow}
-              className="last:border-b-0"
+              className="hidden last:border-b-0 md:block"
+            />
+          ))}
+
+          {trendingEvents.slice(0, 5).map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              isSelected={event.id === selectedEventId}
+              onSelect={handleSelectEventMobile}
+              selectedTimeWindow={timeWindow}
+              showHighlight={false}
+              className="last:border-b-0 md:hidden"
             />
           ))}
         </Card>
+        {/* Selected event details */}
         <Card className="col-span-2 hidden gap-4 pr-0 pb-0 md:block">
           <CardHeader className="gap-0">
             <CardTitle className="flex items-center justify-between">
@@ -201,13 +235,7 @@ export function FeaturedEvents({
                   href={`/event/${selectedEventId}`}
                   className="underline-offset-4 hover:underline"
                 >
-                  {formatVenue(
-                    eventMeta.venueCity ?? "",
-                    eventMeta.venueState ?? "",
-                    eventMeta.venueExtendedAddress ?? "",
-                  )}{" "}
-                  • {eventMeta.venueName} •{" "}
-                  {formatDate(eventMeta.localDatetime ?? "")}
+                  <EventDetails eventMeta={eventMeta} />
                 </Link>
               ) : (
                 <Skeleton className="h-5 w-20" />
@@ -230,7 +258,48 @@ export function FeaturedEvents({
             />
           </CardContent>
         </Card>
+
+        {selectedEvent && (
+          <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle className="pl-0 text-left">
+                  {selectedEvent.artistName}
+                </DrawerTitle>
+                <DrawerDescription className="text-left">
+                  <EventDetails eventMeta={eventMeta} />
+                </DrawerDescription>
+              </DrawerHeader>
+              <DrawerFooter>
+                <DrawerClose asChild>
+                  <Button>Close</Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        )}
       </div>
     </div>
   );
 }
+
+const EventDetails = ({
+  eventMeta,
+}: {
+  eventMeta: RouterOutputs["events"]["getEventMeta"];
+}) => {
+  return (
+    <>
+      {eventMeta && (
+        <>
+          {formatVenue(
+            eventMeta.venueCity ?? "",
+            eventMeta.venueState ?? "",
+            eventMeta.venueExtendedAddress ?? "",
+          )}{" "}
+          • {eventMeta.venueName} • {formatDate(eventMeta.localDatetime ?? "")}
+        </>
+      )}
+    </>
+  );
+};

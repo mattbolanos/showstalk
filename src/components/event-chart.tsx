@@ -57,7 +57,7 @@ export function EventChart({
       },
     );
 
-    const rawSpread = (max - min) * 0.1;
+    const rawSpread = (max - min) * 0.15;
 
     // Calculate nice tick values
     const minTick = Math.floor(min / 5) * 5; // Round down to nearest 5
