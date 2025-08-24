@@ -20,6 +20,7 @@ export function EventChart({
   version,
   trendDirection,
   disableAnimations,
+  className,
 }: {
   eventMetrics: {
     fetchDate: Date | string;
@@ -28,6 +29,7 @@ export function EventChart({
   version?: "icon" | "full";
   trendDirection: "good" | "bad";
   disableAnimations?: boolean;
+  className?: string;
 }) {
   const timeWindow = useTimeWindow((state) => state.timeWindow);
 
@@ -85,6 +87,7 @@ export function EventChart({
       className={cn(
         "aspect-auto h-62 w-full pr-1",
         version === "icon" && "-my-2 h-12 w-23 pr-0",
+        className,
       )}
     >
       <AreaChart data={data}>

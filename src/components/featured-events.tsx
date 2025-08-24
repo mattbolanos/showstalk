@@ -165,6 +165,7 @@ export function FeaturedEvents({
             />
           ))}
         </Card>
+
         {/* Selected event details */}
         <Card className="col-span-2 hidden gap-4 pr-0 pb-0 md:block">
           <CardHeader className="gap-0">
@@ -261,7 +262,7 @@ export function FeaturedEvents({
 
         {selectedEvent && (
           <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-            <DrawerContent>
+            <DrawerContent className="min-h-[97svh]">
               <DrawerHeader>
                 <DrawerTitle className="pl-0 text-left">
                   {selectedEvent.artistName}
@@ -270,6 +271,17 @@ export function FeaturedEvents({
                   <EventDetails eventMeta={eventMeta} />
                 </DrawerDescription>
               </DrawerHeader>
+              <TimeWindowSelect />
+              <EventChart
+                eventMetrics={eventMetrics ?? []}
+                trendDirection={
+                  eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
+                    ? "good"
+                    : "bad"
+                }
+                version="full"
+                className="ml-4 pr-4"
+              />
               <DrawerFooter>
                 <DrawerClose asChild>
                   <Button>Close</Button>
