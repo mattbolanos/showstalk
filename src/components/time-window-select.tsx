@@ -56,7 +56,7 @@ export function TimeWindowSelect({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex items-center", className)}>
-      <div className="relative flex w-full items-center justify-start">
+      <div className="relative flex w-full items-center justify-center md:justify-start">
         <div className="relative">
           {/* Hover Highlight */}
           <div

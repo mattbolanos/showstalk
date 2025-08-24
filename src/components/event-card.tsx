@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ChangeText } from "./change-text";
 import { EventChart, TIME_WINDOWS } from "./event-chart";
 import { Skeleton } from "./ui/skeleton";
+import { useIsTouch } from "@/lib/use-is-touch";
 
 type Event = RouterOutputs["events"]["getTrending"][number];
 
@@ -29,14 +30,17 @@ export function EventCard({
   onSelect,
   isSelected,
   selectedTimeWindow,
+  showHighlight = true,
   className,
 }: {
   event: Event;
-  onSelect: () => void;
+  onSelect: (eventId: string) => void;
   isSelected: boolean;
   selectedTimeWindow: keyof typeof TIME_WINDOWS;
+  showHighlight?: boolean;
   className?: string;
 }) {
+  const isTouch = useIsTouch();
   const { data: eventMetrics } = api.events.getEventMetrics.useQuery({
     eventId: event.id,
   });
@@ -46,14 +50,19 @@ export function EventCard({
     windowDays: TIME_WINDOWS[selectedTimeWindow].days,
   });
 
+  const handleSelect = () => {
+    onSelect(event.id);
+  };
+
   return (
     <div
       key={event.id}
-      onMouseDown={onSelect}
+      onMouseDown={handleSelect}
       className={cn(
         "cursor-default border-b p-2 transition-all duration-100",
-        isSelected && "bg-accent/80",
+        isSelected && showHighlight && "bg-accent/80",
         !isSelected && "hover:bg-accent/50",
+        !showHighlight && "hover:bg-accent/50",
         className,
       )}
     >
@@ -97,6 +106,7 @@ export function EventCard({
                 : "bad"
             }
             version="icon"
+            disableAnimations={isTouch}
           />
         ) : (
           <Skeleton className="bg-primary/10 h-10 w-23 rounded-xs" />

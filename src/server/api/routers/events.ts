@@ -127,7 +127,7 @@ export const eventsRouter = createTRPCRouter({
         .from(eventMetrics)
         .where(eq(eventMetrics.eventId, input.eventId))
         .orderBy(desc(eventMetrics.fetchDate))
-        .limit(input.windowDays == -1 ? 730 : input.windowDays + 1)
+        .limit(input.windowDays == -1 ? 730 : input.windowDays)
         .then((rows) => rows.map((row) => row.minPriceTotal));
 
       if (!metrics?.length) return null;

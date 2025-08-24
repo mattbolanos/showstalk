@@ -19,6 +19,8 @@ export function EventChart({
   eventMetrics,
   version,
   trendDirection,
+  disableAnimations,
+  className,
 }: {
   eventMetrics: {
     fetchDate: Date | string;
@@ -26,6 +28,8 @@ export function EventChart({
   }[];
   version?: "icon" | "full";
   trendDirection: "good" | "bad";
+  disableAnimations?: boolean;
+  className?: string;
 }) {
   const timeWindow = useTimeWindow((state) => state.timeWindow);
 
@@ -55,7 +59,7 @@ export function EventChart({
       },
     );
 
-    const rawSpread = (max - min) * 0.1;
+    const rawSpread = (max - min) * 0.15;
 
     // Calculate nice tick values
     const minTick = Math.floor(min / 5) * 5; // Round down to nearest 5
@@ -83,6 +87,7 @@ export function EventChart({
       className={cn(
         "aspect-auto h-62 w-full pr-1",
         version === "icon" && "-my-2 h-12 w-23 pr-0",
+        className,
       )}
     >
       <AreaChart data={data}>
@@ -210,6 +215,7 @@ export function EventChart({
               : "var(--color-change-bad)"
           }
           animationDuration={800}
+          isAnimationActive={!disableAnimations}
         />
       </AreaChart>
     </ChartContainer>
