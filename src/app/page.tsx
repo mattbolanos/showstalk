@@ -35,7 +35,7 @@ export default function Home() {
   void api.events.getTrending.prefetch();
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-screen-xl flex-col space-y-4">
+    <div className="mx-auto flex max-w-screen-xl flex-col space-y-4">
       <TrendingPrefetches />
       {/* Hero section */}
       <section className="relative w-full overflow-hidden py-4 lg:py-12">

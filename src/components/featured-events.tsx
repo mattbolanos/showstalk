@@ -44,6 +44,7 @@ import { ChangeText } from "./change-text";
 import { Skeleton } from "./ui/skeleton";
 import Link from "next/link";
 import { useIsTouch } from "@/lib/use-is-touch";
+import { Separator } from "./ui/separator";
 
 type TrendingEvents = RouterOutputs["events"]["getTrending"];
 
@@ -270,19 +271,48 @@ export function FeaturedEvents({
                 <DrawerDescription className="text-left">
                   <EventDetails eventMeta={eventMeta} />
                 </DrawerDescription>
+                <Separator className="my-2" />
+                {eventPriceChange ? (
+                  <NumberFlowGroup>
+                    <span className="flex items-center gap-1.5">
+                      <NumberFlow
+                        value={eventPriceChange.currentPrice ?? 0}
+                        format={{
+                          style: "currency",
+                          currency: "USD",
+                          maximumFractionDigits: 0,
+                          minimumFractionDigits: 0,
+                        }}
+                        className="font-medium tabular-nums"
+                      />
+                      <ChangeText
+                        value={eventPriceChange.percentChange!}
+                        className="text-sm font-medium"
+                      />
+                    </span>
+                  </NumberFlowGroup>
+                ) : (
+                  <Skeleton className="h-6 w-20" />
+                )}
+                <p className="text-muted-foreground text-left text-sm">
+                  {TIME_WINDOWS[timeWindow].description}
+                </p>
               </DrawerHeader>
-              <TimeWindowSelect />
-              <EventChart
-                eventMetrics={eventMetrics ?? []}
-                trendDirection={
-                  eventPriceChange?.rawChange && eventPriceChange.rawChange < 0
-                    ? "good"
-                    : "bad"
-                }
-                disableAnimations
-                version="full"
-                className="ml-4 pr-4"
-              />
+              <div className="space-y-4">
+                <TimeWindowSelect />
+                <EventChart
+                  eventMetrics={eventMetrics ?? []}
+                  trendDirection={
+                    eventPriceChange?.rawChange &&
+                    eventPriceChange.rawChange < 0
+                      ? "good"
+                      : "bad"
+                  }
+                  disableAnimations
+                  version="full"
+                  className="ml-4 pr-2"
+                />
+              </div>
               <DrawerFooter>
                 <DrawerClose asChild>
                   <Button>Close</Button>
