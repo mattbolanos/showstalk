@@ -16,7 +16,7 @@ export const HeroCardVisual = ({
   children?: React.ReactNode;
 }) => {
   return (
-    <div className="relative h-96 w-full lg:h-110 lg:max-w-3xl">
+    <div className="relative hidden h-96 w-full md:block lg:h-110 lg:max-w-3xl">
       {/* Background Glow */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/30 to-purple-600/30 blur-3xl dark:from-pink-500/20 dark:to-purple-600/20" />
 
