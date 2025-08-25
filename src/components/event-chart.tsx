@@ -77,6 +77,22 @@ export function EventChart({
     };
   }, [data]);
 
+  const textColor = React.useMemo(() => {
+    if (trendDirection === "good") {
+      return "var(--color-change-good)";
+    } else {
+      return "var(--color-change-bad)";
+    }
+  }, [trendDirection]);
+
+  const color = React.useMemo(() => {
+    if (trendDirection === "good") {
+      return "url(#fillMinPriceTotalGood)";
+    } else {
+      return "url(#fillMinPriceTotalBad)";
+    }
+  }, [trendDirection]);
+
   return (
     <ChartContainer
       config={{
@@ -204,16 +220,8 @@ export function EventChart({
         <Area
           dataKey="minPriceTotal"
           type="natural"
-          fill={
-            trendDirection === "good"
-              ? "url(#fillMinPriceTotalGood)"
-              : "url(#fillMinPriceTotalBad)"
-          }
-          stroke={
-            trendDirection === "good"
-              ? "var(--color-change-good)"
-              : "var(--color-change-bad)"
-          }
+          fill={color}
+          stroke={textColor}
           animationDuration={800}
           isAnimationActive={!disableAnimations}
         />
