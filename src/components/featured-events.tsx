@@ -154,7 +154,7 @@ export function FeaturedEvents({
             />
           ))}
 
-          {trendingEvents.slice(0, 5).map((event) => (
+          {trendingEvents.slice(0, 8).map((event) => (
             <EventCard
               key={event.id}
               event={event}
