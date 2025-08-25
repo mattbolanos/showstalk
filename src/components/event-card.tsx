@@ -59,7 +59,7 @@ export function EventCard({
       key={event.id}
       onMouseDown={handleSelect}
       className={cn(
-        "cursor-default border-b p-2 transition-all duration-100",
+        "cursor-default border-b p-2",
         isSelected && showHighlight && "bg-accent/80",
         !isSelected && "hover:bg-accent/50",
         !showHighlight && "hover:bg-accent/50",

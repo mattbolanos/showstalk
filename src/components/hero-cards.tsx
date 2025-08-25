@@ -194,7 +194,7 @@ function PriceTicker({
 
   return (
     <Card
-      className={`z-6 w-36 gap-0 border-none p-0 shadow-lg backdrop-blur-xs transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-2 ${className}`}
+      className={`z-6 w-36 gap-0 border-none p-0 shadow-lg backdrop-blur-xs transition-all duration-100 hover:scale-105 hover:shadow-xl hover:ring-2 ${className}`}
     >
       <Link
         href={`/event/${eventId}`}

@@ -20,7 +20,7 @@ export function ChangeText({
         signDisplay: "always",
       }}
       className={cn(
-        "font-medium tabular-nums transition-colors duration-300",
+        "font-medium tabular-nums transition-colors duration-100",
         value < 0 ? "text-change-good" : "text-change-bad",
         className,
       )}
