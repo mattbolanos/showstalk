@@ -1,0 +1,1 @@
+ALTER TABLE "ticket"."event_artists" ADD COLUMN "artist_event_rank" integer NOT NULL DEFAULT -1;

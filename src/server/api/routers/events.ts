@@ -15,55 +15,86 @@ import { z } from "zod";
 const latestFetchDateSubquery = sql`(SELECT MAX(${eventMetrics.fetchDate}) FROM ${eventMetrics})`;
 
 type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+type TrendingEvent = {
+  id: string;
+  name: string;
+  venueCity: string;
+  venueState: string;
+  venueName: string;
+  venueExtendedAddress: string;
+  localDatetime: string;
+  metrics: { minPriceTotal: number }[];
+  eventArtists: { artistId: string; artist: { name: string; image: string } }[];
+};
 
 const getTrending = async (ctx: Context) => {
-  const rankedEvents = ctx.db
+  const rawTrendingEvents = await ctx.db
     .select({
-      eventId: eventMetrics.eventId,
-      popularityScore: eventMetrics.popularityScore,
-      artistId: eventArtists.artistId,
-      minPriceTotal: eventMetrics.minPriceTotal,
-      artistRank: sql<number>`ROW_NUMBER() OVER (
-        PARTITION BY ${eventArtists.artistId}
-        ORDER BY ${eventMetrics.popularityScore} DESC
-      )`.as("artist_rank"),
-      eventRank: sql<number>`ROW_NUMBER() OVER (
-        PARTITION BY ${eventMetrics.eventId}
-        ORDER BY ${eventMetrics.popularityScore} DESC
-      )`.as("event_rank"),
-    })
-    .from(eventMetrics)
-    .leftJoin(eventArtists, eq(eventArtists.eventId, eventMetrics.eventId))
-    .where(eq(eventMetrics.fetchDate, latestFetchDateSubquery))
-    .as("ranked_events");
-
-  return await ctx.db
-    .select({
-      id: rankedEvents.eventId,
+      eventId: eventMeta.id,
       name: eventMeta.name,
-      artistId: rankedEvents.artistId,
-      artistName: artists.name,
-      artistImage: artists.image,
       venueCity: eventMeta.venueCity,
-      venueName: eventMeta.venueName,
       venueState: eventMeta.venueState,
+      venueName: eventMeta.venueName,
       venueExtendedAddress: eventMeta.venueExtendedAddress,
       localDatetime: eventMeta.localDatetime,
-      minPriceTotal: rankedEvents.minPriceTotal,
-      updatedAt: eventMeta.updatedAt,
+      artistId: eventArtists.artistId,
+      artistName: artists.name,
+      artistImage: artists.image,
+      minPriceTotal: eventMetrics.minPriceTotal,
     })
-    .from(rankedEvents)
-    .leftJoin(eventMeta, eq(eventMeta.id, rankedEvents.eventId))
-    .leftJoin(artists, eq(artists.id, rankedEvents.artistId))
+    .from(eventMeta)
+    .leftJoin(eventArtists, eq(eventMeta.id, eventArtists.eventId))
+    .leftJoin(artists, eq(eventArtists.artistId, artists.id))
+    .leftJoin(eventMetrics, eq(eventMeta.id, eventMetrics.eventId))
     .where(
       and(
-        eq(rankedEvents.artistRank, 1),
-        eq(rankedEvents.eventRank, 1),
-        gte(eventMeta.utcDatetime, new Date().toISOString()),
+        eq(eventArtists.artistEventRank, 1),
+        eq(eventMetrics.fetchDate, latestFetchDateSubquery),
       ),
     )
-    .orderBy(desc(rankedEvents.popularityScore))
-    .limit(6);
+    .orderBy(desc(eventMetrics.popularityScore))
+    .limit(10);
+
+  // Create object to store events with artists
+  const trendingEvents = rawTrendingEvents.reduce(
+    (acc, event) => {
+      // If event doesn't exist in accumulator, create it
+      if (!(event.eventId in acc)) {
+        acc[event.eventId] = {
+          id: event.eventId,
+          name: event.name,
+          venueCity: event.venueCity,
+          venueState: event.venueState,
+          venueName: event.venueName,
+          venueExtendedAddress: event.venueExtendedAddress!,
+          localDatetime: event.localDatetime,
+          metrics: [
+            {
+              minPriceTotal: event.minPriceTotal!,
+            },
+          ],
+          eventArtists: [],
+        };
+      }
+
+      // Add artist if it exists
+      if (event.artistId) {
+        acc[event.eventId]!.eventArtists.push({
+          artistId: event.artistId,
+          artist: {
+            name: event.artistName!,
+            image: event.artistImage!,
+          },
+        });
+      }
+
+      return acc;
+    },
+    {} as Record<string, TrendingEvent>,
+  );
+
+  // Convert object to array
+  return Object.values(trendingEvents);
 };
 
 export const eventsRouter = createTRPCRouter({

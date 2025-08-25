@@ -69,7 +69,11 @@ export function EventCard({
       <div className="flex items-center gap-1">
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="truncate font-medium">{event.artistName}</p>
+            <p className="truncate font-medium">
+              {event.eventArtists
+                .map((artist) => artist.artist.name)
+                .join(" • ")}
+            </p>
             {eventPriceChange ? (
               <p className="text-sm font-medium tabular-nums">
                 {`$${eventPriceChange.currentPrice}`}

@@ -169,84 +169,116 @@ export function FeaturedEvents({
 
         {/* Selected event details */}
         <Card className="col-span-2 hidden gap-4 pr-0 pb-0 md:block">
-          <CardHeader className="gap-0">
-            <CardTitle className="flex items-center justify-between">
-              {eventMeta && selectedEvent ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="group h-auto justify-start p-0 text-left hover:bg-transparent"
-                    >
-                      <div className="flex items-center gap-1">
-                        <h2 className="text-foreground group-hover:text-primary text-base transition-colors">
-                          {selectedEvent.artistName}
-                        </h2>
-                        <ChevronDownIcon className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48">
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link
-                        href={`/artist/${selectedEvent.artistId}`}
-                        prefetch={true}
+          <DropdownMenu>
+            <CardHeader className="gap-0">
+              <CardTitle className="flex items-center justify-between">
+                {eventMeta && selectedEvent ? (
+                  <>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="group h-auto justify-start p-0 text-left hover:bg-transparent"
                       >
-                        <MicVocalIcon className="stroke-1.5 stroke-primary size-4" />
-                        View Artist Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link href={`/event/${selectedEventId}`} prefetch={true}>
-                        <TicketIcon className="stroke-1.5 stroke-primary size-4" />
-                        View Event Details
-                      </Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Skeleton className="h-5 w-40" />
-              )}
-              {eventPriceChange ? (
-                <NumberFlowGroup>
-                  <span className="flex items-center gap-1.5">
-                    <NumberFlow
-                      value={eventPriceChange.currentPrice ?? 0}
-                      format={{
-                        style: "currency",
-                        currency: "USD",
-                        maximumFractionDigits: 0,
-                        minimumFractionDigits: 0,
-                      }}
-                      className="font-medium tabular-nums"
-                    />
-                    <ChangeText
-                      value={eventPriceChange.percentChange!}
-                      className="text-sm font-medium"
-                    />
-                  </span>
-                </NumberFlowGroup>
-              ) : (
-                <Skeleton className="h-6 w-20" />
-              )}
-            </CardTitle>
-            <CardDescription className="flex items-center justify-between">
-              {eventMeta ? (
-                <Link
-                  prefetch={true}
-                  href={`/event/${selectedEventId}`}
-                  className="underline-offset-4 hover:underline"
-                >
-                  <EventDetails eventMeta={eventMeta} />
-                </Link>
-              ) : (
-                <Skeleton className="h-5 w-20" />
-              )}
-              <span className="text-muted-foreground text-xs font-medium">
-                {TIME_WINDOWS[timeWindow].description}
-              </span>
-            </CardDescription>
-          </CardHeader>
+                        <div className="flex items-center gap-1">
+                          <h2 className="text-foreground group-hover:text-primary text-base transition-colors">
+                            {selectedEvent.name}
+                          </h2>
+                          <ChevronDownIcon className="text-muted-foreground group-hover:text-primary size-4 transition-colors" />
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56">
+                      {selectedEvent.eventArtists.map((artist) => (
+                        <DropdownMenuItem
+                          asChild
+                          className="cursor-pointer"
+                          key={artist.artistId}
+                        >
+                          <Link
+                            href={`/artist/${artist.artistId}`}
+                            prefetch={true}
+                          >
+                            <div className="flex w-full items-center justify-between">
+                              <div className="leading-snug">
+                                <p>Go to Artist</p>
+                                <p className="text-muted-foreground">
+                                  {artist.artist.name}
+                                </p>
+                              </div>
+                              <MicVocalIcon className="stroke-1.5 stroke-primary size-5" />
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuItem asChild className="cursor-pointer">
+                        <Link
+                          href={`/event/${selectedEventId}`}
+                          prefetch={true}
+                        >
+                          <div className="flex w-full items-center justify-between">
+                            <div className="leading-snug">
+                              <p>Go to Event</p>
+                              <p className="text-muted-foreground">
+                                {new Date(
+                                  selectedEvent.localDatetime,
+                                ).toLocaleDateString("en-US", {
+                                  month: "numeric",
+                                  day: "numeric",
+                                  timeZone: "UTC",
+                                })}
+                                {" • "}
+                                {selectedEvent.name}
+                              </p>
+                            </div>
+                            <TicketIcon className="stroke-1.5 stroke-primary size-5" />
+                          </div>
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </>
+                ) : (
+                  <Skeleton className="h-5 w-40" />
+                )}
+                {eventPriceChange ? (
+                  <NumberFlowGroup>
+                    <span className="flex items-center gap-1.5">
+                      <NumberFlow
+                        value={eventPriceChange.currentPrice ?? 0}
+                        format={{
+                          style: "currency",
+                          currency: "USD",
+                          maximumFractionDigits: 0,
+                          minimumFractionDigits: 0,
+                        }}
+                        className="font-medium tabular-nums"
+                      />
+                      <ChangeText
+                        value={eventPriceChange.percentChange!}
+                        className="text-sm font-medium"
+                      />
+                    </span>
+                  </NumberFlowGroup>
+                ) : (
+                  <Skeleton className="h-6 w-20" />
+                )}
+              </CardTitle>
+              <CardDescription className="flex items-center justify-between">
+                {eventMeta ? (
+                  // make the description a trigger for the same dropdown menu
+                  <DropdownMenuTrigger asChild className="focus:outline-none">
+                    <button className="hover:text-primary cursor-pointer text-left">
+                      <EventDetails eventMeta={eventMeta} />
+                    </button>
+                  </DropdownMenuTrigger>
+                ) : (
+                  <Skeleton className="h-5 w-20" />
+                )}
+                <span className="text-muted-foreground text-xs font-medium">
+                  {TIME_WINDOWS[timeWindow].description}
+                </span>
+              </CardDescription>
+            </CardHeader>
+          </DropdownMenu>
           <CardContent className="pr-0">
             <EventChart
               eventMetrics={eventMetrics ?? []}
@@ -266,7 +298,7 @@ export function FeaturedEvents({
             <DrawerContent className="min-h-[90svh]">
               <DrawerHeader>
                 <DrawerTitle className="pl-0 text-left">
-                  {selectedEvent.artistName}
+                  {selectedEvent.name}
                 </DrawerTitle>
                 <DrawerDescription className="text-left">
                   <EventDetails eventMeta={eventMeta} />

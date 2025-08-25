@@ -68,6 +68,7 @@ export const eventArtists = ticketSchema.table(
   {
     eventId: text("event_id").notNull(),
     artistId: text("artist_id").notNull(),
+    artistEventRank: integer("artist_event_rank").notNull(),
   },
   (t) => [
     primaryKey({ columns: [t.eventId, t.artistId] }),
@@ -112,13 +113,17 @@ export const eventMetrics = ticketSchema.table(
     ),
   ],
 );
-
 export const eventMetaRelations = relations(eventMeta, ({ many }) => ({
   eventArtists: many(eventArtists),
+  metrics: many(eventMetrics),
 }));
 
-export const artistRelations = relations(artists, ({ many }) => ({
-  eventArtists: many(eventArtists),
+export const eventMetricsRelations = relations(eventMetrics, ({ one }) => ({
+  event: one(eventMeta, {
+    fields: [eventMetrics.eventId],
+    references: [eventMeta.id],
+    relationName: "event",
+  }),
 }));
 
 export const eventArtistsRelations = relations(eventArtists, ({ one }) => ({
@@ -129,6 +134,5 @@ export const eventArtistsRelations = relations(eventArtists, ({ one }) => ({
   artist: one(artists, {
     fields: [eventArtists.artistId],
     references: [artists.id],
-    relationName: "artist",
   }),
 }));

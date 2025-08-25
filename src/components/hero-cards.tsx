@@ -153,10 +153,10 @@ export function HeroCards({ topEvents }: { topEvents: TrendingEvents }) {
       {/* Price Ticker Cards */}
       {topEvents.map((event, index) => (
         <PriceTicker
-          key={event.artistName}
+          key={event.id}
           eventId={event.id}
-          artist={event.artistName!}
-          price={event.minPriceTotal}
+          artist={event.eventArtists[0]?.artist.name ?? ""}
+          price={event.metrics[0]?.minPriceTotal ?? 0}
           className={cn(
             "animate-float absolute",
             index === 0 && "top-2 left-6 -rotate-8 hover:ring-pink-500",
