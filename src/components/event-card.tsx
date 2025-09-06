@@ -16,12 +16,21 @@ export const formatVenue = (
   state: string,
   extendedAddress: string,
 ) => {
-  const trimmedState = state.trim();
-  if (trimmedState) return `${city}, ${trimmedState}`;
   if (extendedAddress) {
-    if (extendedAddress.includes(",")) return extendedAddress;
+    if (extendedAddress.includes(",")) {
+      const sanitized = extendedAddress
+        // drop only a trailing ZIP (5-digit or ZIP+4) preceded by a comma
+        .replace(/,\s*\d{5}(?:-\d{4})?$/i, "")
+        // then strip any leftover trailing comma
+        .replace(/,\s*$/, "")
+        .trim();
+      return sanitized;
+    }
     return `${city}, ${extendedAddress}`;
   }
+  const trimmedState = state.trim();
+  if (trimmedState) return `${city}, ${trimmedState}`;
+
   return city;
 };
 

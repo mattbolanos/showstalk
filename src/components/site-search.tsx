@@ -64,7 +64,7 @@ export function SiteSearch() {
     const timer = setTimeout(() => {
       setQuery(value);
       setDebounceLoading(false);
-    }, 200);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [value]);
@@ -90,7 +90,7 @@ export function SiteSearch() {
     {
       query,
     },
-    { enabled: searchOpen && !!query, queryHash: query },
+    { enabled: searchOpen && !!query && query.length > 1, staleTime: 60_000 },
   );
 
   const {
@@ -101,7 +101,7 @@ export function SiteSearch() {
     {
       query,
     },
-    { enabled: searchOpen && !!query },
+    { enabled: searchOpen && !!query && query.length > 1, staleTime: 60_000 },
   );
 
   const isLoading = artistsLoading || debounceLoading || eventsLoading;
