@@ -57,15 +57,17 @@ export function SiteSearch() {
   const { searchOpen, setSearchOpen } = useSearch();
   const [value, setValue] = React.useState("");
   const [query, setQuery] = React.useState("");
-  const [debounceLoading, startLoadingTransition] = React.useTransition();
+  const [debounceLoading, setDebounceLoading] = React.useState(false);
 
   React.useEffect(() => {
-    startLoadingTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 150)).then(() => {
-        setQuery(value);
-      });
-    });
-  }, [value, startLoadingTransition]);
+    setDebounceLoading(true);
+    const timer = setTimeout(() => {
+      setQuery(value);
+      setDebounceLoading(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [value]);
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
