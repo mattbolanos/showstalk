@@ -16,12 +16,14 @@ export const formatVenue = (
   state: string,
   extendedAddress: string,
 ) => {
-  const trimmedState = state.trim();
-  if (trimmedState) return `${city}, ${trimmedState}`;
   if (extendedAddress) {
-    if (extendedAddress.includes(",")) return extendedAddress;
+    if (extendedAddress.includes(","))
+      return extendedAddress.replace(/\s*\d+\s*/g, "").replace(/,\s*$/, "");
     return `${city}, ${extendedAddress}`;
   }
+  const trimmedState = state.trim();
+  if (trimmedState) return `${city}, ${trimmedState}`;
+
   return city;
 };
 

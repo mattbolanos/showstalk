@@ -61,8 +61,9 @@ export function SiteSearch() {
 
   React.useEffect(() => {
     startLoadingTransition(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      setQuery(value);
+      await new Promise((resolve) => setTimeout(resolve, 150)).then(() => {
+        setQuery(value);
+      });
     });
   }, [value, startLoadingTransition]);
 

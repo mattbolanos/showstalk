@@ -235,9 +235,13 @@ export const eventsRouter = createTRPCRouter({
         .from(eventMeta)
         .where(
           and(
-            sql`
-            ((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}) % ${q})
-          `,
+            or(
+              ilike(eventMeta.name, `%${q}%`),
+              ilike(eventMeta.venueName, `%${q}%`),
+              ilike(eventMeta.venueCity, `%${q}%`),
+              ilike(eventMeta.venueState, `%${q}%`),
+              sql`((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}) % ${q})`,
+            ),
             gte(
               eventMeta.localDatetime,
               new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -245,8 +249,17 @@ export const eventsRouter = createTRPCRouter({
           ),
         )
         .orderBy(
-          sql`similarity((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}), ${q}) DESC`,
+          sql`
+          CASE 
+            WHEN ${eventMeta.name} ILIKE ${"%" + q + "%"}
+              OR ${eventMeta.venueName} ILIKE ${"%" + q + "%"}
+              OR ${eventMeta.venueCity} ILIKE ${"%" + q + "%"}
+              OR ${eventMeta.venueState} ILIKE ${"%" + q + "%"}
+            THEN 1 ELSE 2 
+          END,
+          similarity((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}), ${q}) DESC
+        `,
         )
-        .limit(10);
+        .limit(8);
     }),
 });
