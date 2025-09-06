@@ -186,7 +186,8 @@ export const eventsRouter = createTRPCRouter({
   searchArtists: publicProcedure
     .input(z.object({ query: z.string() }))
     .query(async ({ ctx, input }) => {
-      const q = input.query;
+      const q = input.query.trim();
+      if (q.length < 2) return [];
 
       return ctx.db
         .select({
@@ -198,9 +199,25 @@ export const eventsRouter = createTRPCRouter({
         .from(artists)
         .where(
           or(
+            // Basic substring matches
             ilike(artists.name, `%${q}%`),
             ilike(artists.slug, `%${q}%`),
-            sql`((${artists.name} || ' ' || ${artists.slug}) % ${q})`,
+
+            // Trigram similarity with threshold
+            sql`
+              similarity(
+                (${artists.name} || ' ' || ${artists.slug}),
+                ${q}
+              ) > 0.3
+            `,
+
+            // Weighted FTS (name = A, slug = B)
+            sql`
+              (
+                setweight(to_tsvector('english', unaccent(${artists.name})), 'A') ||
+                setweight(to_tsvector('english', unaccent(${artists.slug})), 'B')
+              ) @@ plainto_tsquery('english', ${q})
+            `,
           ),
         )
         .orderBy(
@@ -210,7 +227,16 @@ export const eventsRouter = createTRPCRouter({
               OR ${artists.slug} ILIKE ${"%" + q + "%"} 
             THEN 1 ELSE 2 
           END,
-          similarity((${artists.name} || ' ' || ${artists.slug}), ${q}) DESC
+          GREATEST(
+            similarity((${artists.name} || ' ' || ${artists.slug}), ${q}),
+            ts_rank(
+              (
+                setweight(to_tsvector('english', unaccent(${artists.name})), 'A') ||
+                setweight(to_tsvector('english', unaccent(${artists.slug})), 'B')
+              ),
+              plainto_tsquery('english', ${q})
+            )
+          ) DESC
         `,
         )
         .limit(10);
@@ -236,15 +262,33 @@ export const eventsRouter = createTRPCRouter({
         .where(
           and(
             or(
+              // Basic substring matches
               ilike(eventMeta.name, `%${q}%`),
               ilike(eventMeta.venueName, `%${q}%`),
               ilike(eventMeta.venueCity, `%${q}%`),
               ilike(eventMeta.venueState, `%${q}%`),
-              sql`((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}) % ${q})`,
+
+              // Trigram similarity with threshold (typo-tolerant)
+              sql`
+                similarity(
+                  (${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}),
+                  ${q}
+                ) > 0.3
+              `,
+
+              // Weighted Full-text search
+              sql`
+                (
+                  setweight(to_tsvector('english', unaccent(${eventMeta.name})), 'A') ||
+                  setweight(to_tsvector('english', unaccent(${eventMeta.venueName})), 'B') ||
+                  setweight(to_tsvector('english', unaccent(${eventMeta.venueCity} || ' ' || ${eventMeta.venueState})), 'C')
+                ) @@ plainto_tsquery('english', ${q})
+              `,
             ),
+            // Only include events in the future or within the last 7 days
             gte(
-              eventMeta.localDatetime,
-              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+              eventMeta.utcDatetime,
+              new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
             ),
           ),
         )
@@ -257,7 +301,20 @@ export const eventsRouter = createTRPCRouter({
               OR ${eventMeta.venueState} ILIKE ${"%" + q + "%"}
             THEN 1 ELSE 2 
           END,
-          similarity((${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}), ${q}) DESC
+          GREATEST(
+            similarity(
+              (${eventMeta.name} || ' ' || ${eventMeta.venueName} || ' ' || ${eventMeta.venueCity} || ' ' || ${eventMeta.venueState}),
+              ${q}
+            ),
+            ts_rank(
+              (
+                setweight(to_tsvector('english', unaccent(${eventMeta.name})), 'A') ||
+                setweight(to_tsvector('english', unaccent(${eventMeta.venueName})), 'B') ||
+                setweight(to_tsvector('english', unaccent(${eventMeta.venueCity} || ' ' || ${eventMeta.venueState})), 'C')
+              ),
+              plainto_tsquery('english', ${q})
+            )
+          ) DESC
         `,
         )
         .limit(8);
