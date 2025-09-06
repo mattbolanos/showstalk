@@ -90,7 +90,7 @@ export function SiteSearch() {
     {
       query,
     },
-    { enabled: searchOpen && !!query && query.length > 1 },
+    { enabled: searchOpen && !!query && query.length > 1, staleTime: 60_000 },
   );
 
   const {
@@ -101,7 +101,7 @@ export function SiteSearch() {
     {
       query,
     },
-    { enabled: searchOpen && !!query && query.length > 1 },
+    { enabled: searchOpen && !!query && query.length > 1, staleTime: 60_000 },
   );
 
   const isLoading = artistsLoading || debounceLoading || eventsLoading;

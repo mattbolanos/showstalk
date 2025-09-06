@@ -314,7 +314,8 @@ export const eventsRouter = createTRPCRouter({
               ),
               plainto_tsquery('english', ${q})
             )
-          ) DESC
+          ) DESC,
+           ${eventMeta.utcDatetime} ASC
         `,
         )
         .limit(8);
